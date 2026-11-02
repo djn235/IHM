@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IHM | Repository Index</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#070b18;--bg2:#0d1430;--card:rgba(255,255,255,.045);--card-b:rgba(255,255,255,.09);
+      --txt:#e6e9f5;--mut:#9aa3c2;--a1:#6366f1;--a2:#22d3ee;--a3:#a855f7;--a4:#f472b6;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--trk:#34d399;--grad:linear-gradient(120deg,var(--a1),var(--a3) 45%,var(--a2));--code-bg:#0a0f22;--shadow:0 20px 60px -20px rgba(0,0,0,.6);--r:20px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.75;font-size:17px;overflow-x:hidden;transition:background .6s,color .6s}
+    ::selection{background:var(--a3);color:#fff}
+    .aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+    .aurora span{position:absolute;width:55vmax;height:55vmax;border-radius:50%;filter:blur(90px);opacity:.28;animation:float 22s ease-in-out infinite}
+    .aurora span:nth-child(1){background:var(--a1);top:-20vmax;left:-15vmax}
+    .aurora span:nth-child(2){background:var(--a2);bottom:-25vmax;right:-15vmax;animation-delay:-7s}
+    .aurora span:nth-child(3){background:var(--trk);top:30%;left:35%;width:30vmax;height:30vmax;opacity:.16;animation-delay:-14s}
+    @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6vw,-5vh) scale(1.12)}66%{transform:translate(-5vw,6vh) scale(.92)}}
+    .grid-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at center, black 35%, transparent 100%)}
+    .wrap{max-width:1200px;margin:0 auto;padding:0 22px}
+    .topbar{position:fixed;top:4px;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:12px 22px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(7,11,24,.5);border-bottom:1px solid rgba(255,255,255,.06)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+    .logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff;font-weight:600;box-shadow:0 18px 35px -12px rgba(99,102,241,.7)}
+    .brand small{display:block;font-weight:400;color:var(--mut);font-size:12px;line-height:1.2}
+    .hero{padding:140px 0 60px}
+    .hero-inner{display:grid;grid-template-columns:1.2fr 0.8fr;gap:40px;align-items:center}
+    .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;border:1px solid var(--card-b);background:var(--card);font-size:14px;color:var(--mut)}
+    .chip i{width:8px;height:8px;border-radius:50%;background:var(--trk);box-shadow:0 0 10px var(--trk);animation:pulse 1.8s infinite}
+    @keyframes pulse{50%{opacity:.3}}
+    .hero h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.12;font-weight:800;margin:20px 0 16px;letter-spacing:-.02em}
+    .gtxt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 6s linear infinite}
+    @keyframes shine{to{background-position:200% center}}
+    .hero p.lead{color:var(--mut);font-size:1.08rem;max-width:620px}
+    .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+    .meta div{padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);font-size:14px}
+    .meta b{display:block;color:var(--a2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+    .term{background:var(--code-bg);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);box-shadow:var(--shadow),0 0 60px -20px var(--a1);overflow:hidden;transition:transform .2s}
+    .term-h{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
+    .term-h i{width:11px;height:11px;border-radius:50%;background:#ff5f57}
+    .term-h i:nth-child(2){background:#febc2e}.term-h i:nth-child(3){background:#28c840}
+    .term-h span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5b6591}
+    .term pre{padding:20px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#c9d1f5;min-height:260px;white-space:pre-wrap}
+    .wrap-section{padding:20px 0 40px}
+    .section-header{margin-bottom:26px}
+    .section-header h2{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.25;letter-spacing:-.01em}
+    .section-header small{display:block;color:var(--mut);font-size:13px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+    .num{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:20px;color:#fff;background:var(--grad);box-shadow:0 18px 35px -14px rgba(99,102,241,.75);margin-right:18px}
+    .grid3{display:grid;grid-template-columns:repeat(3, minmax(0,1fr));gap:18px}
+    .card{position:relative;display:block;text-decoration:none;background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);padding:24px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);transition:transform .25s,border-color .25s,box-shadow .25s}
+    .card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(140deg,rgba(99,102,241,.5),transparent 40%,transparent 60%,rgba(34,211,238,.4));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+    .card:hover{transform:translateY(-6px);border-color:rgba(34,211,238,.5);box-shadow:0 20px 40px -20px rgba(34,211,238,.45)}
+    .card h3{font-size:1.12rem;margin-bottom:8px;color:var(--txt)}
+    .card p{color:var(--mut);font-size:15px}
+    .tag{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;margin-bottom:12px;border:1px solid rgba(255,255,255,.1);background:rgba(99,102,241,.12);color:#dbeafe;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+    .card .btn-link{margin-top:16px;display:inline-flex;padding:8px 14px;border-radius:12px;font-weight:700;font-size:14px;background:var(--grad);color:#fff;text-decoration:none}
+    .footer{padding:24px 0 60px;color:var(--mut);font-size:14px;text-align:center}
+    .footer a{color:var(--a2);text-decoration:none}
+    @media (max-width:900px){
+      .hero-inner{grid-template-columns:1fr}
+      .grid3{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:560px){
+      .grid3{grid-template-columns:1fr}
+      .brand small{display:none}
+      .hero{padding-top:120px}
+    }
+  </style>
+</head>
+<body>
+  <div class="aurora"><span></span><span></span><span></span></div>
+  <div class="grid-bg"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">IHM</div>
+      <div>Human-Machine Interface<small>Repository index</small></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <div>
+          <span class="chip"><i></i> djn235/IHM &nbsp;•&nbsp; Repository overview</span>
+          <h1>Course <span class="gtxt">materials</span> and exercises</h1>
+          <p class="lead">This index links every element available in the repository, with the same visual language and dark neon styling used throughout the Human-Machine Interface course content.</p>
+          <div class="meta">
+            <div><b>Repository</b>djn235/IHM</div>
+            <div><b>Language</b>HTML</div>
+            <div><b>Contents</b>Module files + license</div>
+          </div>
+        </div>
+
+        <div class="term" aria-label="Repository summary terminal">
+          <div class="term-h"><i></i><i></i><i></i><span>repo-index.txt</span></div>
+          <pre>root/
+├── IHM_S00_Foundations_of_HMI.html
+├── IHM_S01_HTML_Semantic_Structure.html
+├── IHM_S02_HTML_Links_Multimedia.html
+├── IHM_S03_HTML_Lists_Tables.html
+├── IHM_S04_HTML_Forms_Accessibility.html
+├── IHM_S05_CSS_Selectors_Cascade_BoxModel.html
+├── IHM_S06_CSS_Flexbox_Grid.html
+├── IHM_S07_CSS_Responsive_Design.html
+├── IHM_S08_CSS_Transitions_Animations.html
+├── IHM_S09_JS_Fundamentals.html
+├── IHM_S10_JS_Functions_Arrays_Objects.html
+├── IHM_S11_JS_DOM_Events.html
+├── IHM_S12_JS_Integrated_Project.html
+├── IHM_TP01_HTML_Semantic_Structure.html
+├── ...
+└── LICENSE</pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap-section">
+      <div class="wrap">
+        <div class="section-header">
+          <div class="num">01</div>
+          <h2>Lecture modules<small>Session files</small></h2>
+        </div>
+
+        <div class="grid3">
+          <a class="card" href="IHM_S00_Foundations_of_HMI.html">
+            <span class="tag">S00</span>
+            <h3>Foundations of HMI</h3>
+            <p>Human-machine interface fundamentals, usability, ergonomic criteria and course introduction.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S01_HTML_Semantic_Structure.html">
+            <span class="tag">S01</span>
+            <h3>HTML Semantic Structure</h3>
+            <p>Document structure, semantic elements, metadata and accessibility foundations.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S02_HTML_Links_Multimedia.html">
+            <span class="tag">S02</span>
+            <h3>Links &amp; Multimedia</h3>
+            <p>Navigation, anchors, images, media and interaction through rich content.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S03_HTML_Lists_Tables.html">
+            <span class="tag">S03</span>
+            <h3>Lists &amp; Tables</h3>
+            <p>Structured content for content-heavy interfaces and data presentation.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S04_HTML_Forms_Accessibility.html">
+            <span class="tag">S04</span>
+            <h3>Forms &amp; Accessibility</h3>
+            <p>Inputs, validation, labels, keyboard support and inclusive interface design.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S05_CSS_Selectors_Cascade_BoxModel.html">
+            <span class="tag">S05</span>
+            <h3>CSS Selectors &amp; Box Model</h3>
+            <p>Selectors, specificity, cascade rules and the box model in modern CSS.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S06_CSS_Flexbox_Grid.html">
+            <span class="tag">S06</span>
+            <h3>Flexbox &amp; Grid</h3>
+            <p>Layout systems for building robust responsive interfaces.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S07_CSS_Responsive_Design.html">
+            <span class="tag">S07</span>
+            <h3>Responsive Design</h3>
+            <p>Mobile-first approaches, breakpoints and adaptive interface patterns.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S08_CSS_Transitions_Animations.html">
+            <span class="tag">S08</span>
+            <h3>Transitions &amp; Animations</h3>
+            <p>Motion and state transitions that preserve clarity and usability.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S09_JS_Fundamentals.html">
+            <span class="tag">S09</span>
+            <h3>JavaScript Fundamentals</h3>
+            <p>Variables, operators, conditionals and core programming concepts.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S10_JS_Functions_Arrays_Objects.html">
+            <span class="tag">S10</span>
+            <h3>Functions, Arrays &amp; Objects</h3>
+            <p>Data modelling and reusable logic for practical front-end work.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S11_JS_DOM_Events.html">
+            <span class="tag">S11</span>
+            <h3>DOM &amp; Events</h3>
+            <p>Manipulating page content dynamically and listening to user interaction.</p>
+            <span class="btn-link">Open</span>
+          </a>
+
+          <a class="card" href="IHM_S12_JS_Integrated_Project.html">
+            <span class="tag">S12</span>
+            <h3>Integrated Project</h3>
+            <p>Final project synthesis combining HTML, CSS and JavaScript skills.</p>
+            <span class="btn-link">Open</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap-section">
+      <div class="wrap">
+        <div class="section-header">
+          <div class="num">02</div>
+          <h2>Practical work<small>TP files</small></h2>
+        </div>
+
+        <div class="grid3">
+          <a class="card" href="IHM_TP01_HTML_Semantic_Structure.html"><span class="tag">TP01</span><h3>Semantic Structure</h3><p>Practical HTML structure exercises.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP02_HTML_Links_Multimedia.html"><span class="tag">TP02</span><h3>Links &amp; Multimedia</h3><p>Navigation and media integration practice.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP03_HTML_Lists_Tables.html"><span class="tag">TP03</span><h3>Lists &amp; Tables</h3><p>Organizing and displaying structured data.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP04_HTML_Forms_Accessibility.html"><span class="tag">TP04</span><h3>Forms &amp; Accessibility</h3><p>Accessible form design and validation practice.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP05_CSS_Selectors_Cascade_BoxModel.html"><span class="tag">TP05</span><h3>Selectors &amp; Box Model</h3><p>CSS styling basics and layout control.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP06_CSS_Flexbox_Grid.html"><span class="tag">TP06</span><h3>Flexbox &amp; Grid</h3><p>Layout exercise using CSS modern positioning.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP07_CSS_Responsive_Design.html"><span class="tag">TP07</span><h3>Responsive Design</h3><p>Adapting interfaces across screen sizes.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP08_CSS_Transitions_Animations.html"><span class="tag">TP08</span><h3>Transitions &amp; Animations</h3><p>UI motion and dynamic visual feedback.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP09_JS_Fundamentals.html"><span class="tag">TP09</span><h3>JavaScript Fundamentals</h3><p>Core logic and interactivity practice.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP10_JS_Functions_Arrays_Objects.html"><span class="tag">TP10</span><h3>Functions &amp; Data</h3><p>Organizing logic with functions and objects.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP11_JS_DOM_Events.html"><span class="tag">TP11</span><h3>DOM &amp; Events</h3><p>Dynamic interaction with browser events.</p><span class="btn-link">Open</span></a>
+          <a class="card" href="IHM_TP12_JS_Integrated_Project.html"><span class="tag">TP12</span><h3>Integrated Project</h3><p>Final practical assignment and synthesis task.</p><span class="btn-link">Open</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap-section">
+      <div class="wrap">
+        <div class="section-header">
+          <div class="num">03</div>
+          <h2>Additional resources<small>License and support</small></h2>
+        </div>
+
+        <div class="grid3">
+          <a class="card" href="LICENSE">
+            <span class="tag">MIT</span>
+            <h3>License</h3>
+            <p>Project license details.</p>
+            <span class="btn-link">Open</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Repository index for <a href="https://github.com/djn235/IHM">djn235/IHM</a> • Visual style inspired by the course materials</p>
+  </footer>
+</body>
+</html>
