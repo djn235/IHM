@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Human-Machine Interface, Session 08: Transitions & Animations. Dr. Gharbi Farouk, University of Tipaza.">
+<meta name="author" content="Dr. Gharbi Farouk">
+<title>IHM | Session 08 - Transitions & Animations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b18;--bg2:#0d1430;--card:rgba(255,255,255,.045);--card-b:rgba(255,255,255,.09);
+  --txt:#e6e9f5;--mut:#9aa3c2;
+  --a1:#6366f1;--a2:#22d3ee;--a3:#a855f7;--a4:#f472b6;
+  --ok:#34d399;--warn:#fbbf24;--bad:#f87171;
+  --trk:#38bdf8;
+  --grad:linear-gradient(120deg,var(--a1),var(--a3) 45%,var(--a2));
+  --code-bg:#0a0f22;--shadow:0 20px 60px -20px rgba(0,0,0,.6);--r:20px;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5fc;--bg2:#e7ebfa;--card:rgba(255,255,255,.78);--card-b:rgba(30,41,99,.12);
+  --txt:#141a33;--mut:#56608a;--shadow:0 20px 50px -25px rgba(40,50,120,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.75;font-size:17px;overflow-x:hidden;transition:background .6s,color .6s}
+::selection{background:var(--a3);color:#fff}
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora span{position:absolute;width:55vmax;height:55vmax;border-radius:50%;filter:blur(90px);opacity:.28;animation:float 22s ease-in-out infinite}
+.aurora span:nth-child(1){background:var(--a1);top:-20vmax;left:-15vmax}
+.aurora span:nth-child(2){background:var(--a2);bottom:-25vmax;right:-15vmax;animation-delay:-7s}
+.aurora span:nth-child(3){background:var(--trk);top:30%;left:35%;width:30vmax;height:30vmax;opacity:.16;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6vw,-5vh) scale(1.12)}66%{transform:translate(-5vw,6vh) scale(.92)}}
+.grid-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.glow{position:fixed;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:-1;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 65%);transform:translate(-50%,-50%)}
+.progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--grad);z-index:100;box-shadow:0 0 18px var(--a2)}
+.topbar{position:fixed;top:4px;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:10px 22px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(7,11,24,.55);border-bottom:1px solid var(--card-b);transition:transform .4s}
+:root[data-theme="light"] .topbar{background:rgba(243,245,252,.7)}
+.topbar.hide{transform:translateY(-120%)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff;font-weight:600;box-shadow:0 0 25px rgba(168,85,247,.5)}
+.brand small{display:block;font-weight:400;color:var(--mut);font-size:12px;line-height:1.2}
+.tbtn{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:7px 16px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:14px;transition:.3s}
+.tbtn:hover{border-color:var(--a2);box-shadow:0 0 20px rgba(34,211,238,.35)}
+.sidenav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:12px}
+.sidenav a{position:relative;width:12px;height:12px;border-radius:50%;background:var(--card-b);display:block;transition:.35s}
+.sidenav a.active{background:var(--a2);box-shadow:0 0 0 5px rgba(34,211,238,.18),0 0 16px var(--a2);transform:scale(1.25)}
+.sidenav a span{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(8px);white-space:nowrap;font-size:13px;background:var(--bg2);border:1px solid var(--card-b);padding:3px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:.3s;color:var(--txt)}
+.sidenav a:hover span{opacity:1;transform:translateY(-50%) translateX(0)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+section{padding:90px 0 30px}
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:110px}
+.hero-inner{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;width:100%}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;border:1px solid var(--card-b);background:var(--card);font-size:14px;color:var(--mut)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--trk);box-shadow:0 0 10px var(--trk);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.hero h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.12;font-weight:800;margin:20px 0 16px;letter-spacing:-.02em}
+.gtxt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.hero p.lead{color:var(--mut);font-size:1.1rem;max-width:580px}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.meta div{padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);font-size:14px}
+.meta b{display:block;color:var(--a2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{position:relative;overflow:hidden;border:none;padding:13px 28px;border-radius:14px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;color:#fff;background:var(--grad);background-size:200%;box-shadow:0 10px 30px -10px var(--a3);transition:.4s;text-decoration:none;display:inline-block}
+.btn:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 18px 40px -12px var(--a3)}
+.btn.ghost{background:transparent;border:1px solid var(--card-b);color:var(--txt);box-shadow:none}
+.btn.ghost:hover{border-color:var(--a1)}
+.term{background:var(--code-bg);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);box-shadow:var(--shadow),0 0 60px -20px var(--a1);overflow:hidden;transition:transform .2s}
+.term-h{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
+.term-h i{width:11px;height:11px;border-radius:50%;background:#ff5f57}
+.term-h i:nth-child(2){background:#febc2e}.term-h i:nth-child(3){background:#28c840}
+.term-h span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5b6591}
+.term pre{padding:20px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#c9d1f5;min-height:300px;white-space:pre-wrap}
+.caret{display:inline-block;width:8px;height:17px;background:var(--a2);vertical-align:middle;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sec-h{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.num{flex:none;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:20px;color:#fff;background:var(--grad);box-shadow:0 10px 30px -10px var(--a1)}
+.sec-h h2{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.25;letter-spacing:-.01em}
+.sec-h small{display:block;color:var(--mut);font-size:13px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+h3{font-size:1.22rem;margin:26px 0 10px;color:var(--a2)}
+h4{margin:16px 0 6px}
+p{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);padding:26px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);margin-bottom:20px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(140deg,rgba(99,102,241,.5),transparent 40%,transparent 60%,rgba(34,211,238,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.card>h3:first-child{margin-top:0}
+code.i{font-family:'JetBrains Mono',monospace;font-size:.84em;background:rgba(99,102,241,.16);color:#a5b4fc;padding:1px 7px;border-radius:6px;white-space:nowrap}
+:root[data-theme="light"] code.i{color:#4338ca}
+ul.list{list-style:none;margin:8px 0 14px}
+ul.list li{position:relative;padding-left:26px;margin-bottom:6px}
+ul.list li::before{content:"";position:absolute;left:4px;top:11px;width:9px;height:9px;border-radius:3px;background:var(--grad);transform:rotate(45deg)}
+ol.steps{margin:8px 0 14px 22px}
+ol.steps li{margin-bottom:6px;padding-left:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.note{border-left:4px solid var(--a2);background:rgba(34,211,238,.07);padding:14px 18px;border-radius:12px;margin:16px 0}
+.note.warn{border-color:var(--warn);background:rgba(251,191,36,.07)}
+.note.ok{border-color:var(--ok);background:rgba(52,211,153,.07)}
+.note.def{border-color:var(--a3);background:rgba(168,85,247,.08)}
+.note b:first-child{display:block;margin-bottom:2px}
+.obj{display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--card-b);transition:.4s}
+.obj:hover{transform:translateY(-6px);border-color:var(--a3);box-shadow:0 20px 40px -20px var(--a3)}
+.obj .n{flex:none;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--a2);font-size:22px;line-height:1.3}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.track{border-radius:var(--r);padding:20px;background:var(--card);border:1px solid var(--card-b)}
+.track h4{font-family:'JetBrains Mono',monospace;font-size:18px;margin:0 0 12px}
+.track.html h4{color:#fb923c}.track.css h4{color:#38bdf8}.track.js h4{color:#facc15}
+.step{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;border:1px solid transparent;transition:.3s;text-decoration:none;color:inherit}
+.step b{font-family:'JetBrains Mono',monospace;font-size:12px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.07)}
+.step.done{opacity:.62}.step.done b{background:var(--ok);color:#052e1f}
+.step.now{border-color:var(--a2);background:rgba(34,211,238,.09);box-shadow:0 0 25px -8px var(--a2)}
+.step.now b{background:var(--a2);color:#062029}
+.step:hover{background:rgba(255,255,255,.05)}
+.code{margin:16px 0;border-radius:16px;overflow:hidden;background:var(--code-bg);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow)}
+.code-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
+.code-h .lbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b93b8;display:flex;gap:8px;align-items:center}
+.code-h .lbl::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--dot,#fb923c);box-shadow:0 0 8px var(--dot,#fb923c)}
+.code[data-lang="css"]{--dot:#38bdf8}.code[data-lang="js"]{--dot:#facc15}
+.code-h .acts{display:flex;gap:6px}
+.code-h button{font-family:inherit;font-size:12px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#c9d1f5;padding:3px 12px;border-radius:8px;cursor:pointer;transition:.25s}
+.code-h button:hover,.code-h button.on{background:var(--a1);border-color:var(--a1)}
+.code pre{padding:18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;color:#d5dbf5}
+.code pre .ln{display:block;padding-left:42px;position:relative;white-space:pre}
+.code pre .ln::before{content:attr(data-n);position:absolute;left:0;width:28px;text-align:right;color:#3d4670;font-size:12px}
+.code textarea{display:block;width:100%;min-height:260px;padding:18px;border:0;outline:0;resize:vertical;background:#070b1a;color:#e6e9f5;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;tab-size:2;white-space:pre}
+.t-tag{color:#f472b6}.t-att{color:#7dd3fc}.t-str{color:#a3e635}.t-com{color:#5b6591;font-style:italic}.t-ent{color:#fbbf24}.t-pun{color:#8b93b8}
+.t-kw{color:#c084fc}.t-num{color:#fb923c}.t-fn{color:#38bdf8}.t-sel{color:#f9a8d4}.t-prop{color:#7dd3fc}.t-at{color:#c084fc}
+.preview{display:none;border-top:1px solid rgba(255,255,255,.08);background:#fff}
+.preview.open{display:block;animation:drop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes drop{from{opacity:0;transform:translateY(-10px)}}
+.preview iframe{width:100%;height:360px;border:0;display:block;background:#fff}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;font-size:15px;border-radius:14px;overflow:hidden;border:1px solid var(--card-b)}
+.tbl th{background:linear-gradient(120deg,rgba(99,102,241,.35),rgba(168,85,247,.25));padding:11px;text-align:left}
+.tbl td{padding:10px 11px;border-top:1px solid var(--card-b);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.035)}
+.tblw{overflow-x:auto}
+.ex{border-radius:var(--r);background:var(--card);border:1px solid var(--card-b);margin-bottom:22px;overflow:hidden;box-shadow:var(--shadow)}
+.ex-h{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(120deg,rgba(99,102,241,.14),transparent)}
+.ex-h .tag{font-family:'JetBrains Mono',monospace;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--grad);color:#fff;font-size:14px;white-space:nowrap}
+.ex-h h3{margin:0;color:var(--txt);font-size:1.12rem}
+.lvl-b{margin-left:auto;font-size:12px;padding:3px 12px;border-radius:999px;border:1px solid;white-space:nowrap}
+.lvl-b.m{color:var(--warn);border-color:var(--warn)}.lvl-b.a{color:var(--bad);border-color:var(--bad)}.lvl-b.e{color:var(--ok);border-color:var(--ok)}
+.ex-b{padding:6px 24px 22px}
+.sol-btn{margin-top:10px}
+.sol{max-height:0;overflow:hidden;transition:max-height .8s cubic-bezier(.2,.8,.2,1)}
+.sol-in{padding-top:14px}
+.hw{position:relative;border-radius:26px;padding:34px;background:linear-gradient(135deg,rgba(99,102,241,.22),rgba(168,85,247,.16) 50%,rgba(34,211,238,.16));border:1px solid rgba(168,85,247,.4);overflow:hidden}
+.hw::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:var(--a2);filter:blur(120px);opacity:.25;top:-100px;right:-80px;pointer-events:none}
+.hw h3{font-size:1.5rem;margin-top:0;color:var(--txt)}
+.dead{display:inline-block;margin-top:14px;padding:8px 18px;border-radius:12px;background:rgba(0,0,0,.25);font-weight:700}
+:root[data-theme="light"] .dead{background:rgba(255,255,255,.6)}
+.q{margin-bottom:18px}
+.q p{font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:11px 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:15px;text-align:left;transition:.3s}
+.opt:hover{border-color:var(--a1);transform:translateX(4px)}
+.opt.right{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.13);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+.score{font-size:1.2rem;font-weight:700;margin-top:10px}
+.refs li{margin-bottom:6px}
+.refs a{color:var(--a2)}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+/* widgets shared */
+.ctl{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut);min-width:150px;flex:1}
+.ctl select,.ctl input[type=text],.ctl input[type=number]{font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 10px;border-radius:10px;border:1px solid var(--card-b);background:var(--bg2);color:var(--txt)}
+.ctl input[type=range]{accent-color:var(--a2)}
+.stage{border-radius:14px;border:1px dashed var(--card-b);padding:14px;background:rgba(0,0,0,.18);min-height:120px}
+:root[data-theme="light"] .stage{background:rgba(255,255,255,.5)}
+.mono{font-family:'JetBrains Mono',monospace}
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(99,102,241,.18);color:#c7d2fe;margin:2px}
+:root[data-theme="light"] .pill{color:#3730a3}
+footer{margin-top:80px;padding:40px 0;border-top:1px solid var(--card-b);text-align:center;color:var(--mut);font-size:14px}
+footer b{color:var(--txt)}
+footer a{color:var(--a2);text-decoration:none}
+.toTop{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:14px;border:none;background:var(--grad);color:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;cursor:pointer;opacity:0;transform:translateY(20px);transition:.4s;z-index:80;box-shadow:0 10px 30px -10px var(--a3)}
+.toTop.show{opacity:1;transform:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,140px);background:var(--grad);color:#fff;padding:10px 24px;border-radius:12px;font-weight:700;z-index:200;transition:.4s}
+.toast.show{transform:translate(-50%,0)}
+.race{display:flex;flex-direction:column;gap:8px}
+.lane{display:grid;grid-template-columns:270px 1fr;align-items:center;gap:12px}
+.lane code{font-size:12px}
+.track-l{position:relative;height:30px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid var(--card-b)}
+.ball{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--grad);box-shadow:0 0 14px var(--a2)}
+.race.go .ball{left:calc(100% - 25px)}
+.bz{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:center}
+.bz svg{width:240px;height:240px;background:var(--code-bg);border-radius:14px;touch-action:none}
+.bz .h{cursor:grab}
+#bzOut{font-family:'JetBrains Mono',monospace;color:#a3e635;background:var(--code-bg);padding:12px;border-radius:12px;font-size:14px}
+.tf-stage{height:260px;display:grid;place-items:center;border-radius:14px;background:rgba(0,0,0,.18);border:1px dashed var(--card-b);perspective:700px;overflow:hidden}
+.tf-card{width:150px;height:96px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#a855f7 60%,#22d3ee);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;display:grid;place-items:center;box-shadow:0 20px 40px -15px rgba(0,0,0,.7);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.tf-origin{position:absolute;width:10px;height:10px;border-radius:50%;background:#fbbf24;box-shadow:0 0 10px #fbbf24}
+.tf-wrap{position:relative;transform-style:preserve-3d}
+.kf-demo{display:flex;gap:22px;flex-wrap:wrap;align-items:center;justify-content:center;padding:20px}
+.spin{width:44px;height:44px;border-radius:50%;border:4px solid rgba(255,255,255,.12);border-top-color:var(--a2);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pulse{width:16px;height:16px;border-radius:50%;background:var(--ok);animation:pulse2 1.6s ease-out infinite}
+@keyframes pulse2{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}100%{box-shadow:0 0 0 18px rgba(52,211,153,0)}}
+.dots span{display:inline-block;width:10px;height:10px;margin:0 3px;border-radius:50%;background:var(--a3);animation:bounce 1.2s infinite ease-in-out}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-12px);opacity:1}}
+.skel{width:220px;height:14px;border-radius:7px;background:linear-gradient(90deg,rgba(255,255,255,.06) 25%,rgba(255,255,255,.18) 50%,rgba(255,255,255,.06) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite linear}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+.cost{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cost div{padding:16px;border-radius:14px;border:1px solid var(--card-b);background:var(--card)}
+.cost b{display:block;font-family:'JetBrains Mono',monospace;margin-bottom:4px}
+.cost .l b{color:var(--bad)}.cost .p b{color:var(--warn)}.cost .c b{color:var(--ok)}
+@media (max-width:900px){.bz,.cost{grid-template-columns:1fr}.lane{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .hero-inner,.grid2,.road{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .sidenav{display:none}
+  .term{display:none}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .grid3,.opts{grid-template-columns:1fr}
+  .brand small{display:none}
+  .card,.hw{padding:20px}
+  .ex-h{flex-wrap:wrap;padding:16px}
+  .lvl-b{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="grid-bg"></div>
+<div class="glow" id="glow"></div>
+<div class="progress" id="progress"></div>
+
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <div class="logo">IHM</div>
+    <div>Human-Machine Interface<small>Business Computing &middot; Year 1 &middot; Session 08</small></div>
+  </div>
+  <button class="tbtn" id="themeBtn">Light mode</button>
+</header>
+<nav class="sidenav" id="sidenav" aria-label="Section navigation"></nav>
+
+<section class="hero" id="home" data-title="Overview">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="chip rv"><i></i> Session 08 of 12 &middot; CSS Track</span>
+      <h1 class="rv d1">Transitions, Transforms<br>&amp; <span class="gtxt">Animations</span></h1>
+      <p class="lead rv d2">Motion is a channel of communication between the system and the user: it gives feedback, explains changes of state and directs attention. This session covers CSS transitions, two- and three-dimensional transforms and keyframe animations, with rigorous attention to timing, rendering performance and accessibility.</p>
+      <div class="meta rv d3">
+        <div><b>Institution</b>University of Tipaza</div>
+        <div><b>Faculty</b>Economics, Commerce &amp; Management Sciences</div>
+        <div><b>Lecturer</b>Dr. Gharbi Farouk</div>
+        <div><b>Duration</b>90 minutes</div>
+      </div>
+      <div class="cta rv d3">
+        <a class="btn" href="#s1">Start the lecture</a>
+        <a class="btn ghost" href="#exercises">Practical exercises</a>
+      </div>
+    </div>
+    <div class="term rv d2" id="term">
+      <div class="term-h"><i></i><i></i><i></i><span>motion.css</span></div>
+      <pre id="typed"></pre>
+    </div>
+  </div>
+</section>
+<section id="goals" data-title="Learning outcomes"><div class="wrap">
+  <div class="sec-h rv"><div class="num">00</div><h2>Learning Outcomes<small>By the end of this session, students will be able to</small></h2></div>
+  <div class="grid2"><div class="obj rv d0"><div class="n">01</div><div>Justify the use of motion in an interface by its function (feedback, continuity, orientation) and choose appropriate durations.</div></div><div class="obj rv d1"><div class="n">02</div><div>Define transitions and select timing functions, including custom <code class="i">cubic-bezier()</code> curves and <code class="i">steps()</code>.</div></div><div class="obj rv d2"><div class="n">03</div><div>Apply 2D and 3D transforms and control their origin and perspective.</div></div><div class="obj rv d3"><div class="n">04</div><div>Author keyframe animations, and optimise them for performance and accessibility.</div></div></div>
+  <h3 class="rv" style="margin-top:40px">Course roadmap: 12 sessions</h3>
+  <div class="road"><div class="track html rv"><h4>HTML</h4><a class="step done" href="IHM_S01_HTML_Semantic_Structure.html"><b>01</b>Semantic Document Structure</a><a class="step done" href="IHM_S02_HTML_Links_Multimedia.html"><b>02</b>Hyperlinks &amp; Multimedia</a><a class="step done" href="IHM_S03_HTML_Lists_Tables.html"><b>03</b>Lists &amp; Advanced Tables</a><a class="step done" href="IHM_S04_HTML_Forms_Accessibility.html"><b>04</b>Forms &amp; Accessibility</a></div><div class="track css rv"><h4>CSS</h4><a class="step done" href="IHM_S05_CSS_Selectors_Cascade_BoxModel.html"><b>05</b>Selectors, Cascade &amp; Box Model</a><a class="step done" href="IHM_S06_CSS_Flexbox_Grid.html"><b>06</b>Flexbox &amp; Grid Layout</a><a class="step done" href="IHM_S07_CSS_Responsive_Design.html"><b>07</b>Responsive Design</a><a class="step now" href="IHM_S08_CSS_Transitions_Animations.html"><b>08</b>Transitions &amp; Animations</a></div><div class="track js rv"><h4>JavaScript</h4><a class="step " href="IHM_S09_JS_Fundamentals.html"><b>09</b>Variables, Types &amp; Control Flow</a><a class="step " href="IHM_S10_JS_Functions_Arrays_Objects.html"><b>10</b>Functions, Arrays &amp; Objects</a><a class="step " href="IHM_S11_JS_DOM_Events.html"><b>11</b>DOM Manipulation &amp; Events</a><a class="step " href="IHM_S12_JS_Integrated_Project.html"><b>12</b>Integrated Interface Project</a></div></div>
+  <div class="note rv"><b>Recap of the previous session</b>Session 07 made layouts adapt to viewports, containers and user preferences, including <code class="i">prefers-reduced-motion</code>, which today becomes central.</div>
+</div></section>
+<section id="s1" data-title="Purpose of motion"><div class="wrap"><div class="sec-h rv"><div class="num">01</div><h2>Motion as Communication<small>Why, when and how long</small></h2></div>
+<div class="card rv">
+<p>In a well-designed interface, motion is never decorative alone. It serves identifiable functions:</p>
+<div class="grid2">
+<div class="obj"><div class="n">1</div><div><b>Feedback</b><br>Confirms that an action was registered: a button that depresses, a field that shakes on error.</div></div>
+<div class="obj"><div class="n">2</div><div><b>Continuity</b><br>Explains a change of state: a panel that slides in from the side it was summoned from.</div></div>
+<div class="obj"><div class="n">3</div><div><b>Orientation</b><br>Shows where content comes from and goes to, preserving the user's mental model.</div></div>
+<div class="obj"><div class="n">4</div><div><b>Attention and waiting</b><br>Signals new information, or makes a delay perceptibly shorter (loaders, skeleton screens).</div></div>
+</div>
+<div class="tblw"><table class="tbl">
+<tr><th>Interaction</th><th>Recommended duration</th></tr>
+<tr><td>Micro-feedback (hover, press, toggle)</td><td>100 to 200 ms</td></tr>
+<tr><td>Small components (menus, tooltips, accordions)</td><td>200 to 300 ms</td></tr>
+<tr><td>Large surfaces (dialogs, page transitions)</td><td>300 to 500 ms</td></tr>
+</table></div>
+<p>Below 100 ms, a change is perceived as instantaneous; beyond roughly 500 ms, it begins to feel sluggish and obstructs the task.</p>
+</div>
+</div></section>
+
+<section id="s2" data-title="Transitions"><div class="wrap"><div class="sec-h rv"><div class="num">02</div><h2>CSS Transitions<small>Interpolating between two states</small></h2></div>
+<div class="card rv">
+<p>A <b>transition</b> interpolates a property smoothly when its computed value changes, whether through a pseudo-class (<code class="i">:hover</code>, <code class="i">:focus-visible</code>), a class added by JavaScript, or a media query. It is declared on the element in its base state.</p>
+<div class="tblw"><table class="tbl">
+<tr><th>Longhand</th><th>Role</th><th>Example</th></tr>
+<tr><td><code class="i">transition-property</code></td><td>Which properties to animate</td><td><code class="i">transform, background-color</code></td></tr>
+<tr><td><code class="i">transition-duration</code></td><td>How long</td><td><code class="i">250ms</code></td></tr>
+<tr><td><code class="i">transition-timing-function</code></td><td>The acceleration curve</td><td><code class="i">ease-out</code></td></tr>
+<tr><td><code class="i">transition-delay</code></td><td>Waiting time before starting</td><td><code class="i">0s</code></td></tr>
+</table></div>
+<p>Only <b>interpolable</b> properties can transition (lengths, colours, numbers, transforms); <code class="i">display</code> and <code class="i">font-family</code>, for example, change discretely. Avoid <code class="i">transition: all</code>, which animates unintended properties and costs performance.</p>
+</div>
+<div class="code" data-src="c-trans" data-label="transitions.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s3" data-title="Easing"><div class="wrap"><div class="sec-h rv"><div class="num">03</div><h2>Timing Functions<small>ease, cubic-bezier() and steps()</small></h2></div>
+<div class="card rv">
+<p>A timing function maps elapsed time (horizontal axis) to animation progress (vertical axis). Natural objects accelerate and decelerate; linear motion therefore appears mechanical. As a rule, <code class="i">ease-out</code> suits elements entering the screen, <code class="i">ease-in</code> those leaving it, and <code class="i">ease-in-out</code> movements from one position to another.</p>
+<h3>Easing race</h3>
+<div class="race" id="race">
+<div class="lane"><code class="i">linear</code><div class="track-l"><span class="ball" data-e="linear"></span></div></div>
+<div class="lane"><code class="i">ease</code><div class="track-l"><span class="ball" data-e="ease"></span></div></div>
+<div class="lane"><code class="i">ease-in</code><div class="track-l"><span class="ball" data-e="ease-in"></span></div></div>
+<div class="lane"><code class="i">ease-out</code><div class="track-l"><span class="ball" data-e="ease-out"></span></div></div>
+<div class="lane"><code class="i">ease-in-out</code><div class="track-l"><span class="ball" data-e="ease-in-out"></span></div></div>
+<div class="lane"><code class="i">steps(5)</code><div class="track-l"><span class="ball" data-e="steps(5)"></span></div></div>
+<div class="lane"><code class="i" id="customLabel">custom</code><div class="track-l"><span class="ball" style="background:linear-gradient(135deg,#f472b6,#fbbf24)"></span></div></div>
+</div>
+<p style="margin-top:14px"><button class="btn" id="raceBtn">Start / reverse the race</button></p>
+</div>
+<div class="card rv">
+<h3>Cubic Bezier editor</h3>
+<p>A <code class="i">cubic-bezier(x1, y1, x2, y2)</code> curve is defined by two control points. Drag the pink and blue handles: values of <i>y</i> above 1 produce an <b>overshoot</b> (a spring-like effect). The resulting curve drives the last lane of the race above.</p>
+<div class="bz"><svg id="bzSvg" viewBox="0 0 240 240" aria-label="Bezier curve editor"></svg><div><div id="bzOut"></div><p style="margin-top:12px;color:var(--mut)">The horizontal coordinates must stay between 0 and 1 (time cannot flow backwards); the vertical coordinates are unrestricted.</p></div></div>
+</div>
+</div></section>
+
+<section id="s4" data-title="Transforms"><div class="wrap"><div class="sec-h rv"><div class="num">04</div><h2>Transforms<small>translate, rotate, scale, skew and 3D</small></h2></div>
+<div class="card rv">
+<p>The <code class="i">transform</code> property modifies the coordinate space of an element without affecting the layout of its neighbours: the element is moved, rotated or scaled visually while its original space in the flow is preserved. The functions are composed in order, each operating in the coordinate system produced by those to its left (equivalently, they act on the element from <b>right to left</b>), all relative to the <code class="i">transform-origin</code>. Their order therefore matters: <code class="i">rotate(45deg) translateX(100px)</code> differs from <code class="i">translateX(100px) rotate(45deg)</code>.</p>
+<h3>Transform laboratory</h3>
+<div class="ctl">
+<label>translateX: <b id="tv_tx"></b><input type="range" data-t="tx" min="-100" max="100" value="0"></label>
+<label>rotate: <b id="tv_rot"></b><input type="range" data-t="rot" min="-180" max="180" value="0"></label>
+<label>scale: <b id="tv_sc"></b><input type="range" data-t="sc" min="0.5" max="1.6" step="0.05" value="1"></label>
+<label>skewX: <b id="tv_sk"></b><input type="range" data-t="sk" min="-30" max="30" value="0"></label>
+<label>rotateY (3D): <b id="tv_ry"></b><input type="range" data-t="ry" min="-180" max="180" value="25"></label>
+<label>transform-origin: <b id="tv_or"></b><select data-t="or"><option>center</option><option>top left</option><option>bottom right</option><option>left center</option></select></label>
+</div>
+<div class="grid2">
+<div class="tf-stage"><div class="tf-wrap"><div class="tf-card" id="tfCard">.card</div><span class="tf-origin" id="tfOrigin"></span></div></div>
+<div class="code" data-lang="css" style="margin:0"><div class="code-h"><span class="lbl">generated.css</span></div><pre id="tfCode"></pre></div>
+</div>
+</div>
+<div class="note def rv"><b>The third dimension</b><code class="i">perspective</code>, set on the parent, defines the distance between the viewer and the plane z = 0: small values exaggerate depth. <code class="i">transform-style: preserve-3d</code> lets children share the parent's 3D space, and <code class="i">backface-visibility: hidden</code> hides the reverse face of a rotated element: the three ingredients of a card-flip effect.</div>
+<div class="code" data-src="c-flip" data-label="flip-card.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s5" data-title="Keyframes"><div class="wrap"><div class="sec-h rv"><div class="num">05</div><h2>Keyframe Animations<small>@keyframes and the animation properties</small></h2></div>
+<div class="card rv">
+<p>Whereas a transition needs a trigger and has two states, a <b>keyframe animation</b> runs autonomously through any number of intermediate states defined in a <code class="i">@keyframes</code> rule.</p>
+<div class="kf-demo"><div class="spin" role="img" aria-label="Spinner"></div><div class="pulse" role="img" aria-label="Live indicator"></div><div class="dots" role="img" aria-label="Typing indicator"><span></span><span></span><span></span></div><div><div class="skel"></div><div class="skel" style="width:160px;margin-top:8px"></div></div></div>
+<div class="tblw"><table class="tbl">
+<tr><th>Property</th><th>Values</th></tr>
+<tr><td><code class="i">animation-name</code> / <code class="i">-duration</code> / <code class="i">-timing-function</code> / <code class="i">-delay</code></td><td>As for transitions</td></tr>
+<tr><td><code class="i">animation-iteration-count</code></td><td>A number, or <code class="i">infinite</code></td></tr>
+<tr><td><code class="i">animation-direction</code></td><td><code class="i">normal</code>, <code class="i">reverse</code>, <code class="i">alternate</code>, <code class="i">alternate-reverse</code></td></tr>
+<tr><td><code class="i">animation-fill-mode</code></td><td><code class="i">none</code>, <code class="i">forwards</code> (keep the end state), <code class="i">backwards</code> (apply the start state during the delay), <code class="i">both</code></td></tr>
+<tr><td><code class="i">animation-play-state</code></td><td><code class="i">running</code> or <code class="i">paused</code></td></tr>
+</table></div>
+</div>
+<div class="code" data-src="c-kf" data-label="keyframes.html" data-lang="html" data-run></div>
+<div class="note rv"><b>Staggering</b>A sequence of elements entering one after another reads as a coherent group. Rather than writing one rule per element, assign an index through a custom property (<code class="i">style="--i: 3"</code>) and compute the delay: <code class="i">animation-delay: calc(var(--i) * 80ms)</code>.</div>
+</div></section>
+
+<section id="s6" data-title="Performance"><div class="wrap"><div class="sec-h rv"><div class="num">06</div><h2>Performance and Accessibility<small>The rendering pipeline and motion sensitivity</small></h2></div>
+<div class="card rv">
+<p>The browser renders a frame in successive stages: <b>style</b>, <b>layout</b> (geometry), <b>paint</b> (pixels) and <b>composite</b> (assembly of layers on the GPU). The cost of an animation depends on the earliest stage it invalidates; to reach 60 frames per second, each frame must be produced in about 16.7 ms.</p>
+<div class="cost">
+<div class="l"><b>Layout: expensive</b>width, height, top, left, margin, padding, font-size. Recomputes geometry, often of the whole page.</div>
+<div class="p"><b>Paint: moderate</b>color, background, box-shadow, border-radius. Redraws pixels without moving anything.</div>
+<div class="c"><b>Composite: cheap</b>transform and opacity. Handled by the compositor, usually on the GPU.</div>
+</div>
+<p style="margin-top:14px">Hence the rule: <b>animate <code class="i">transform</code> and <code class="i">opacity</code></b>. To move an element, use <code class="i">translate</code> rather than <code class="i">left</code>; to enlarge it, <code class="i">scale</code> rather than <code class="i">width</code>. <code class="i">will-change: transform</code> can prepare a layer in advance, but must be used sparingly, since each layer consumes memory.</p>
+</div>
+<div class="card rv">
+<h3>Accessibility obligations</h3>
+<ul class="list">
+<li><b>Reduced motion</b>: users with vestibular disorders may experience nausea or dizziness from large movements. Honour <code class="i">prefers-reduced-motion</code> by removing or replacing motion with a fade (WCAG 2.3.3).</li>
+<li><b>Pause, stop, hide</b>: any automatic movement lasting more than five seconds must be controllable by the user (WCAG 2.2.2).</li>
+<li><b>Flashes</b>: nothing may flash more than three times per second (WCAG 2.3.1), as this can trigger photosensitive seizures.</li>
+<li><b>Never convey information only through motion</b>: the end state must remain understandable.</li>
+</ul>
+</div>
+<div class="code" data-src="c-rm" data-label="reduced-motion.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="exercises" data-title="Exercises"><div class="wrap"><div class="sec-h rv"><div class="num">07</div><h2>Practical Exercises<small>Feedback, loading, depth, choreography</small></h2></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 01</span><h3>An accessible call-to-action button</h3><span class="lvl-b e">Foundational</span></div><div class="ex-b">
+<p>Style a "Subscribe" button with a smooth feedback: on hover and on keyboard focus, it rises by 3px, its shadow deepens and its background shifts colour, in 200ms with an <code class="i">ease-out</code> curve; on press (<code class="i">:active</code>), it returns down instantly. Animate only the necessary properties and provide a visible focus ring.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol1" data-label="solution-01.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 02</span><h3>Loading states: spinner and skeleton screen</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>While a product list is loading, display (a) a circular spinner built with a single element and a <code class="i">@keyframes</code> rotation, with an accessible text alternative, and (b) a skeleton of three cards whose grey blocks shimmer. Both must stop animating when reduced motion is requested.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol2" data-label="solution-02.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 03</span><h3>A 3D flip bank card</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Create a bank card (front: bank name, masked number, holder; back: magnetic strip and security code area) that flips around its vertical axis on hover and on keyboard focus, with perspective and hidden back faces. The card must be focusable and the flip must be replaced by a cross-fade under reduced motion.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol3" data-label="solution-03.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 04</span><h3>Choreographing a dashboard entrance</h3><span class="lvl-b a">Advanced</span></div><div class="ex-b">
+<p>Animate the appearance of six KPI tiles: each fades in and rises by 20px, with a 90ms stagger computed from a custom property index, using a single <code class="i">@keyframes</code> rule and <code class="i">animation-fill-mode: both</code>. Then answer: (1) why <code class="i">both</code> rather than <code class="i">forwards</code>? (2) why animate <code class="i">transform</code> rather than <code class="i">margin-top</code>? (3) what is the total duration of the sequence if each animation lasts 500ms?</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in">
+<div class="code" data-src="sol4" data-label="solution-04.html" data-lang="html" data-run></div>
+<div class="note def"><b>Answers</b>(1) <code class="i">backwards</code>, included in <code class="i">both</code>, applies the first keyframe during the delay; without it, the delayed tiles would be visible at their final position, then vanish and reappear. (2) <code class="i">margin-top</code> triggers layout on every frame and shifts the neighbouring tiles; <code class="i">transform</code> is handled by the compositor. (3) The last tile (index 5) starts at 5 &times; 90 = 450ms and ends at 450 + 500 = <b>950ms</b>.</div>
+</div></div>
+</div></div>
+</div></section>
+
+<section id="quiz" data-title="Quick quiz"><div class="wrap"><div class="sec-h rv"><div class="num">08</div><h2>Check Your Understanding<small>Formative assessment</small></h2></div><div class="card rv" id="quizBox"></div></div></section>
+
+<section id="homework" data-title="Homework"><div class="wrap"><div class="sec-h rv"><div class="num">09</div><h2>Homework Assignment<small>Individual work, to be submitted</small></h2></div>
+<div class="hw rv">
+<h3>Meaningful motion for your start-up website</h3>
+<p>Enhance the responsive website of Session 07 with purposeful motion. Submit <code class="i">lastname_firstname_TP8.zip</code>.</p>
+<ul class="list">
+<li>Transitions on every interactive element (links, buttons, cards, form fields) providing hover and focus feedback within the recommended durations.</li>
+<li>At least one custom <code class="i">cubic-bezier()</code> curve, justified in a comment.</li>
+<li>One 3D effect (flip card or tilted panel) using <code class="i">perspective</code>.</li>
+<li>A staggered entrance animation for a group of elements, driven by a custom property.</li>
+<li>A loading indicator (spinner or skeleton) for a simulated content area.</li>
+<li>Only <code class="i">transform</code> and <code class="i">opacity</code> animated in keyframes, and a complete <code class="i">prefers-reduced-motion</code> fallback.</li>
+<li>A short table (in a comment) listing each animation, its function (feedback, continuity, orientation, attention) and its duration.</li>
+</ul>
+<p><b>Assessment criteria:</b> purposefulness of motion 25% &middot; technical correctness 30% &middot; performance 20% &middot; accessibility 25%.</p>
+<span class="dead">Deadline: beginning of Session 09</span>
+</div>
+</div></section>
+<section id="refs" data-title="Further reading"><div class="wrap"><div class="sec-h rv"><div class="num">10</div><h2>References &amp; Further Reading<small>Primary specifications and reference documentation</small></h2></div><div class="card rv"><ol class="steps refs"><li>W3C. <i>CSS Transitions Level 1</i> and <i>CSS Animations Level 1</i>. <a href="https://www.w3.org/TR/css-animations-1/" target="_blank" rel="noopener noreferrer">w3.org/TR/css-animations-1</a></li><li>W3C. <i>CSS Transforms Module Level 2</i>. <a href="https://www.w3.org/TR/css-transforms-2/" target="_blank" rel="noopener noreferrer">w3.org/TR/css-transforms-2</a></li><li>W3C WAI. <i>WCAG 2.2</i>, success criteria 2.2.2 Pause, Stop, Hide, 2.3.1 Three Flashes and 2.3.3 Animation from Interactions. <a href="https://www.w3.org/TR/WCAG22/" target="_blank" rel="noopener noreferrer">w3.org/TR/WCAG22</a></li><li>Material Design. <i>Motion: easing and duration</i>. <a href="https://m3.material.io/styles/motion/overview" target="_blank" rel="noopener noreferrer">m3.material.io</a></li></ol></div></div></section><footer><div class="wrap">
+  <p><b>Dr. Gharbi Farouk</b> &middot; Human-Machine Interface (IHM)</p>
+  <p>Faculty of Economics, Commerce &amp; Management Sciences &middot; University of Tipaza &middot; Academic year 2026/2027</p>
+  <p style="margin-top:8px">Previous: <a href="IHM_S07_CSS_Responsive_Design.html">Responsive Design</a> &middot; Next: <a href="IHM_S09_JS_Fundamentals.html">Variables, Types &amp; Control Flow</a></p>
+</div></footer>
+
+<button class="toTop" id="toTop" aria-label="Back to top">TOP</button>
+<div class="toast" id="toast">Copied to clipboard</div>
+
+
+<script type="text/plain" id="c-trans">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 24px; }
+  .card {
+    width: 240px; padding: 18px; border-radius: 14px;
+    background: #fff; border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 6px rgba(15,23,42,.08);
+    transition: transform 250ms ease-out, box-shadow 250ms ease-out, border-color 250ms;
+  }
+  .card:hover, .card:focus-visible {
+    transform: translateY(-6px);
+    box-shadow: 0 18px 36px -12px rgba(79,70,229,.45);
+    border-color: #6366f1;
+  }
+  .link { color: #4f46e5; background: linear-gradient(currentColor 0 0) 0 100% / 0 2px no-repeat;
+          transition: background-size .3s ease; text-decoration: none; }
+  .link:hover { background-size: 100% 2px; }
+</style>
+<article class="card" tabindex="0"><h3>Premium plan</h3><p>Hover or focus me.</p></article>
+<p><a class="link" href="#">An animated underline</a></p>
+</script>
+<script type="text/plain" id="c-flip">
+<style>
+  body { font-family: system-ui, sans-serif; display: grid; place-items: center; height: 300px; margin: 0; }
+  .scene { perspective: 800px; }
+  .flip {
+    width: 240px; height: 150px; position: relative;
+    transform-style: preserve-3d;
+    transition: transform .7s cubic-bezier(.2,.8,.2,1);
+  }
+  .scene:hover .flip { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0; border-radius: 14px; display: grid; place-items: center;
+    color: #fff; font-weight: 700; backface-visibility: hidden;
+  }
+  .front { background: linear-gradient(135deg, #4f46e5, #22d3ee); }
+  .back  { background: linear-gradient(135deg, #0f172a, #7c3aed); transform: rotateY(180deg); }
+</style>
+<div class="scene"><div class="flip"><div class="face front">Front: hover me</div><div class="face back">Back</div></div></div>
+</script>
+<script type="text/plain" id="c-kf">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15%      { transform: scale(1.25); }
+    30%      { transform: scale(1); }
+    45%      { transform: scale(1.15); }
+  }
+  .item {
+    padding: 12px 16px; margin: 8px 0; border-radius: 10px; background: #eef2ff;
+    animation: fade-up .6s cubic-bezier(.2,.8,.2,1) both;
+    animation-delay: calc(var(--i) * 120ms);
+  }
+  .heart { display: inline-block; font-size: 32px; color: #e11d48; animation: heartbeat 1.4s ease-in-out infinite; }
+  .heart:hover { animation-play-state: paused; }
+</style>
+<div class="item" style="--i:0">First item</div>
+<div class="item" style="--i:1">Second item</div>
+<div class="item" style="--i:2">Third item</div>
+<p><span class="heart" aria-hidden="true">&hearts;</span> Hover to pause the animation.</p>
+</script>
+<script type="text/plain" id="c-rm">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; }
+  .banner {
+    padding: 16px; border-radius: 12px; background: #4f46e5; color: #fff;
+    animation: slide-in .8s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes slide-in { from { transform: translateX(-110%); } }
+  @keyframes fade-in  { from { opacity: 0; } }
+
+  /* Replace movement with a gentle fade for users who ask for less motion */
+  @media (prefers-reduced-motion: reduce) {
+    .banner { animation-name: fade-in; animation-duration: .3s; }
+    *, *::before, *::after { scroll-behavior: auto !important; }
+  }
+</style>
+<div class="banner">New: quarterly reports are available.</div>
+<p>Enable "Reduce motion" in your operating system, or emulate it in DevTools, then reload.</p>
+</script>
+<script type="text/plain" id="sol1">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 30px; }
+  .cta {
+    font: 600 1rem system-ui; padding: 12px 26px; border: 0; border-radius: 12px; cursor: pointer;
+    color: #fff; background: #4f46e5;
+    box-shadow: 0 4px 10px -4px rgba(79,70,229,.6);
+    transition: transform 200ms ease-out, box-shadow 200ms ease-out, background-color 200ms ease-out;
+  }
+  .cta:hover, .cta:focus-visible {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 24px -10px rgba(79,70,229,.8);
+    background: #7c3aed;
+  }
+  .cta:focus-visible { outline: 3px solid #22d3ee; outline-offset: 3px; }
+  .cta:active { transform: translateY(0); transition-duration: 0s; }
+  @media (prefers-reduced-motion: reduce) { .cta { transition: background-color 200ms; } .cta:hover, .cta:focus-visible { transform: none; } }
+</style>
+<button class="cta" type="button">Subscribe</button>
+</script>
+<script type="text/plain" id="sol2">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 20px; }
+  .spinner {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: 4px solid #e2e8f0; border-top-color: #4f46e5;
+    animation: spin 0.9s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .skeletons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+  .sk-card { padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; }
+  .bar {
+    height: 12px; margin: 8px 0; border-radius: 6px;
+    background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+  .bar.img { height: 70px; }
+  .bar.short { width: 60%; }
+  @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+  @media (prefers-reduced-motion: reduce) { .spinner, .bar { animation: none; } }
+</style>
+<div class="spinner" role="status"><span class="visually-hidden">Loading products...</span></div>
+<div class="skeletons" aria-hidden="true">
+  <div class="sk-card"><div class="bar img"></div><div class="bar"></div><div class="bar short"></div></div>
+  <div class="sk-card"><div class="bar img"></div><div class="bar"></div><div class="bar short"></div></div>
+  <div class="sk-card"><div class="bar img"></div><div class="bar"></div><div class="bar short"></div></div>
+</div>
+</script>
+<script type="text/plain" id="sol3">
+<style>
+  body { margin: 0; height: 320px; display: grid; place-items: center; font-family: system-ui, sans-serif; background: #f1f5f9; }
+  .scene { perspective: 900px; outline: none; border-radius: 16px; }
+  .scene:focus-visible { outline: 3px solid #6366f1; outline-offset: 6px; }
+  .card3d { width: 300px; height: 186px; position: relative; transform-style: preserve-3d;
+            transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .scene:hover .card3d, .scene:focus-visible .card3d { transform: rotateY(180deg); }
+  .face { position: absolute; inset: 0; border-radius: 16px; padding: 18px; color: #fff;
+          backface-visibility: hidden; box-shadow: 0 20px 40px -18px rgba(0,0,0,.6); }
+  .front { background: linear-gradient(135deg, #1e1b4b, #4f46e5 60%, #22d3ee); display: flex; flex-direction: column; justify-content: space-between; }
+  .number { font-family: monospace; font-size: 1.15rem; letter-spacing: .12em; }
+  .back { background: linear-gradient(135deg, #0f172a, #334155); transform: rotateY(180deg); padding: 0; }
+  .strip { height: 40px; margin-top: 22px; background: #000; }
+  .cvv { margin: 18px; padding: 8px; background: #f8fafc; color: #0f172a; text-align: right; font-family: monospace; border-radius: 4px; }
+  @media (prefers-reduced-motion: reduce) {
+    .card3d { transition: none; }
+    .scene:hover .card3d, .scene:focus-visible .card3d { transform: none; }
+    .back { transform: none; opacity: 0; transition: opacity .3s; }
+    .scene:hover .back, .scene:focus-visible .back { opacity: 1; }
+  }
+</style>
+<div class="scene" tabindex="0" aria-label="Bank card, focus to see the back">
+  <div class="card3d">
+    <div class="face front"><strong>Tipaza Bank</strong><span class="number">**** **** **** 4417</span><span>AMINA BENALI</span></div>
+    <div class="face back"><div class="strip"></div><div class="cvv">CVV ***</div></div>
+  </div>
+</div>
+</script>
+<script type="text/plain" id="sol4">
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #f1f5f9; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .kpi {
+    background: #fff; border-radius: 12px; padding: 16px;
+    animation: rise 500ms cubic-bezier(.2,.8,.2,1) both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+  .kpi b { display: block; font-size: 1.5rem; color: #4f46e5; }
+  @keyframes rise { from { opacity: 0; transform: translateY(20px); } }
+  @media (prefers-reduced-motion: reduce) { .kpi { animation: none; } }
+</style>
+<section class="kpis">
+  <div class="kpi" style="--i:0">Revenue<b>4.2 M</b></div>
+  <div class="kpi" style="--i:1">Orders<b>1 284</b></div>
+  <div class="kpi" style="--i:2">Customers<b>862</b></div>
+  <div class="kpi" style="--i:3">Margin<b>23 %</b></div>
+  <div class="kpi" style="--i:4">Returns<b>1.8 %</b></div>
+  <div class="kpi" style="--i:5">NPS<b>+41</b></div>
+</section>
+<p>Click "Run" again to replay the sequence.</p>
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var KW='const|let|var|function|return|if|else|for|while|do|of|in|new|class|extends|this|true|false|null|undefined|typeof|instanceof|switch|case|break|continue|default|async|await|try|catch|finally|throw|import|export|from|static|get|set';
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokJS(code,T){
+    var re=new RegExp("(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)|('(?:\\\\.|[^'\\\\\\n])*'|\"(?:\\\\.|[^\"\\\\\\n])*\"|`(?:\\\\.|[^`\\\\])*`)|(\\b\\d+(?:\\.\\d+)?\\b)|\\b("+KW+")\\b|([A-Za-z_$][\\w$]*)(?=\\s*\\()","g");
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'num':m[4]?'kw':'fn',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokCSS(code,T){
+    var re=/(\/\*[\s\S]*?\*\/)|("[^"\n]*"|'[^'\n]*')|(--[\w-]+|[a-z-]+)(?=\s*:[^;{}]*[;}])|(@[\w-]+)|(#[0-9a-fA-F]{3,8}\b|-?\b\d*\.?\d+(?:px|rem|em|%|vh|vw|vmin|vmax|ms|s|deg|fr|ch)?\b)|([^{};\/@]+?)(?=\s*\{)/g;
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m[0]===''){re.lastIndex++;continue;}
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'prop':m[4]?'at':m[5]?'num':'sel',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokTag(t,T){
+    var m=t.match(/^<(\/?)([!\w-]+)([\s\S]*?)(\/?>)$/);
+    if(!m){T.push(['',t]);return;}
+    T.push(['pun','<'+m[1]]);T.push(['tag',m[2]]);
+    var re=/([\w:@.-]+)(\s*=\s*)?("[^"]*"|'[^']*'|[^\s"'>]+)?|(\s+)|([\s\S])/g,a;
+    while((a=re.exec(m[3]))){
+      if(a[1]){T.push(['att',a[1]]);if(a[2])T.push(['pun',a[2]]);if(a[3])T.push(['str',a[3]]);}
+      else T.push(['',a[0]]);
+    }
+    T.push(['pun',m[4]]);
+  }
+  var CO='<'+'!'+'--',CC='--'+'>';
+  function tokHTML(code,T){
+    var i=0,j;
+    while(i<code.length){
+      if(code.startsWith(CO,i)){
+        j=code.indexOf(CC,i);j=j<0?code.length:j+3;T.push(['com',code.slice(i,j)]);i=j;
+      }else if(code[i]==='<'&&/[\/!a-zA-Z]/.test(code[i+1]||'')){
+        j=code.indexOf('>',i);j=j<0?code.length:j+1;
+        var tg=code.slice(i,j);tokTag(tg,T);i=j;
+        var om=tg.match(/^<(style|script)\b/i);
+        if(om&&!/type\s*=\s*["']text\/plain/i.test(tg)){
+          var close='</'+om[1].toLowerCase(),k=code.toLowerCase().indexOf(close,i);if(k<0)k=code.length;
+          var inner=code.slice(i,k);
+          if(om[1].toLowerCase()==='style')tokCSS(inner,T);else tokJS(inner,T);
+          i=k;
+        }
+      }else{
+        j=code.indexOf('<',i+1);if(j<0)j=code.length;
+        code.slice(i,j).split(/(&[a-zA-Z#0-9]+;)/).forEach(function(p,x){if(p)T.push([x%2?'ent':'',p]);});
+        i=j;
+      }
+    }
+  }
+  function tokens(code,lang){var T=[];(lang==='css'?tokCSS:lang==='js'?tokJS:tokHTML)(code,T);return T;}
+  function render(T,plain){
+    var lines=[[]];
+    T.forEach(function(t){
+      t[1].split('\n').forEach(function(p,i){
+        if(i>0)lines.push([]);
+        if(p)lines[lines.length-1].push(t[0]?'<span class="t-'+t[0]+'">'+esc(p)+'</span>':esc(p));
+      });
+    });
+    if(plain)return lines.map(function(l){return l.join('');}).join('\n');
+    return lines.map(function(l,n){return '<span class="ln" data-n="'+(n+1)+'">'+(l.join('')||' ')+'</span>';}).join('');
+  }
+  window.IHM={hl:function(c,l){return render(tokens(c,l));},hlPlain:function(c,l){return render(tokens(c,l),true);},esc:esc};
+
+  var SC='<'+'script>',SE='<'+'/script>';
+  var CONSOLE='<style>#__c{font:12.5px/1.6 Consolas,monospace;background:#0b1020;color:#c9d1f5;padding:10px 14px;margin-top:16px;border-radius:10px;white-space:pre-wrap}#__c div{border-bottom:1px solid #1e2748;padding:3px 0}#__c .e{color:#f87171}#__c .w{color:#fbbf24}#__c b{color:#22d3ee}</style>'+SC+
+  '(function(){var q=[],box=null;function f(x){if(typeof x==="string")return x;try{return JSON.stringify(x)}catch(e){return String(x)}}'+
+  'function add(c,a){if(!box){q.push([c,a]);return}var d=document.createElement("div");d.className=c;d.textContent="> "+[].map.call(a,f).join(" ");box.appendChild(d)}'+
+  'var L=console.log;console.log=function(){add("",arguments);L.apply(console,arguments)};console.info=console.log;console.table=console.log;'+
+  'console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'+
+  'window.addEventListener("error",function(e){add("e",["Uncaught "+e.message])});'+
+  'document.addEventListener("DOMContentLoaded",function(){box=document.createElement("div");box.id="__c";box.innerHTML="<b>Console</b>";document.body.appendChild(box);q.forEach(function(x){add(x[0],x[1])});q=[]})})()'+SE;
+  function wrapDoc(src,lang,cons){
+    var base='<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;line-height:1.6;color:#1e293b}</style>';
+    var doc;
+    if(lang==='css')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'<style>'+src+'</style></head><body></body></html>';
+    else if(lang==='js')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'</head><body>'+SC+src+SE+'</body></html>';
+    else if(/<html/i.test(src))doc=src;
+    else doc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'+base+'</head><body>'+src+'</body></html>';
+    if(cons){doc=/<head[^>]*>/i.test(doc)?doc.replace(/<head([^>]*)>/i,'<head$1>'+CONSOLE):CONSOLE+doc;}
+    return doc;
+  }
+
+  document.querySelectorAll('.code[data-src]').forEach(function(box){
+    var el=document.getElementById(box.dataset.src);
+    if(!el){box.textContent='Missing source: '+box.dataset.src;return;}
+    var orig=el.textContent.replace(/<\\\/script>/g,SE).replace(/^\n+|\s+$/g,''),src=orig;
+    var lang=box.dataset.lang||'html',run=box.hasAttribute('data-run'),cons=box.hasAttribute('data-console');
+    box.innerHTML='<div class="code-h"><span class="lbl">'+(box.dataset.label||lang)+'</span><div class="acts">'+
+      (run?'<button data-act="run">Run</button><button data-act="edit">Edit live</button>':'')+'<button data-act="copy">Copy</button></div></div><pre>'+IHM.hl(src,lang)+'</pre>'+
+      (run?'<div class="preview"><iframe title="Live preview" loading="lazy"></iframe></div>':'');
+    var pre=box.querySelector('pre');
+    box.querySelector('[data-act="copy"]').onclick=function(){
+      var done=function(){toast('Copied to clipboard');};
+      if(navigator.clipboard)navigator.clipboard.writeText(src).then(done,fallback);else fallback();
+      function fallback(){var ta=document.createElement('textarea');ta.value=src;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();done();}
+    };
+    if(!run)return;
+    var pv=box.querySelector('.preview'),fr=pv.querySelector('iframe'),bRun=box.querySelector('[data-act="run"]'),bEd=box.querySelector('[data-act="edit"]'),ta=null,tm;
+    function show(){fr.srcdoc=wrapDoc(src,lang,cons);}
+    bRun.onclick=function(){
+      var open=pv.classList.toggle('open');
+      if(open)show();
+      bRun.textContent=open?'Hide':'Run';bRun.classList.toggle('on',open);refreshSol(box);
+    };
+    bEd.onclick=function(){
+      if(!ta){
+        ta=document.createElement('textarea');ta.value=src;ta.spellcheck=false;
+        ta.style.height=Math.max(260,pre.offsetHeight)+'px';
+        pre.replaceWith(ta);bEd.textContent='Reset';bEd.classList.add('on');
+        if(!pv.classList.contains('open')){pv.classList.add('open');bRun.textContent='Hide';bRun.classList.add('on');}
+        show();
+        ta.addEventListener('input',function(){src=ta.value;clearTimeout(tm);tm=setTimeout(show,350);});
+        ta.addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDefault();var s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end');src=ta.value;}});
+        ta.focus();
+      }else{
+        src=orig;pre.innerHTML=IHM.hl(src,lang);ta.replaceWith(pre);ta=null;bEd.textContent='Edit live';bEd.classList.remove('on');show();
+      }
+      refreshSol(box);
+    };
+  });
+  function toast(t){var e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(function(){e.classList.remove('show');},1600);}
+  window.IHM.toast=toast;
+  function refreshSol(el){var s=el.closest('.sol');if(s&&s.classList.contains('on'))setTimeout(function(){s.style.maxHeight=s.scrollHeight+600+'px';},40);}
+  window.IHM.refreshSol=refreshSol;
+  document.querySelectorAll('[data-sol]').forEach(function(btn){
+    var sol=btn.nextElementSibling;
+    btn.onclick=function(){
+      var on=sol.classList.toggle('on');
+      sol.style.maxHeight=on?sol.scrollHeight+600+'px':'0';
+      btn.textContent=on?'Hide solution':'Show solution';
+    };
+  });
+
+  var TL=[".btn {", "  transition: transform .25s", "    cubic-bezier(.34, 1.56, .64, 1);", "}", ".btn:hover {", "  transform: translateY(-4px) scale(1.03);", "}", "@keyframes fade-up {", "  from { opacity: 0; transform: translateY(24px); }", "  to   { opacity: 1; transform: none; }", "}", ".card { animation: fade-up .6s ease-out both; }"],TLANG='css',full=TL.join('\n'),k=0,tp=document.getElementById('typed');
+  (function type(){
+    if(!tp)return;
+    if(k<=full.length){tp.innerHTML=IHM.hlPlain(full.slice(0,k),TLANG)+'<span class="caret"></span>';k++;setTimeout(type,full[k-1]==='\n'?170:26);}
+    else setTimeout(function(){k=0;type();},4200);
+  })();
+  var term=document.getElementById('term');
+  if(term){
+    term.addEventListener('mousemove',function(e){var r=term.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;term.style.transform='perspective(900px) rotateY('+(x*14)+'deg) rotateX('+(-y*14)+'deg)';});
+    term.addEventListener('mouseleave',function(){term.style.transform='';});
+  }
+  var glow=document.getElementById('glow');
+  window.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+  document.querySelectorAll('.rv,[data-io]').forEach(function(el){io.observe(el);});
+
+  var secs=[].slice.call(document.querySelectorAll('section[id]')),nav=document.getElementById('sidenav');
+  secs.forEach(function(s){var a=document.createElement('a');a.href='#'+s.id;a.innerHTML='<span>'+(s.dataset.title||s.id)+'</span>';nav.appendChild(a);});
+  var links=nav.querySelectorAll('a'),last=0,bar=document.getElementById('topbar'),top=document.getElementById('toTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,y=h.scrollTop;
+    document.getElementById('progress').style.width=(y/Math.max(1,h.scrollHeight-h.clientHeight)*100)+'%';
+    bar.classList.toggle('hide',y>last&&y>200);last=y;top.classList.toggle('show',y>600);
+    var cur=0;secs.forEach(function(s,i){if(s.offsetTop-window.innerHeight/2<=y)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur);});
+  },{passive:true});
+  top.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+  var tb=document.getElementById('themeBtn');
+  tb.onclick=function(){var r=document.documentElement,l=r.getAttribute('data-theme')==='light';r.setAttribute('data-theme',l?'dark':'light');tb.textContent=l?'Light mode':'Dark mode';};
+
+  var Q=[{"q": "Which properties can be animated most efficiently by the browser?", "o": ["width and height", "top and left", "transform and opacity", "margin and padding"], "a": 2}, {"q": "<code>animation-fill-mode: forwards<\/code> means that:", "o": ["The animation runs forwards only", "The element keeps the styles of the last keyframe after the animation ends", "The animation starts immediately", "The animation loops forever"], "a": 1}, {"q": "An appropriate duration for a hover feedback on a button is about:", "o": ["20 ms", "150 to 300 ms", "1.5 s", "3 s"], "a": 1}, {"q": "Which timing function starts quickly and slows down at the end, suitable for elements entering the screen?", "o": ["ease-in", "ease-out", "linear", "steps(4)"], "a": 1}, {"q": "To respect users who request minimal motion, we use:", "o": ["@media (prefers-reduced-motion: reduce)", "@media (motion: none)", "animation: off", "will-change: none"], "a": 0}],qb=document.getElementById('quizBox');
+  if(qb){
+    var score=0,done=0,res=document.createElement('div');res.className='score gtxt';
+    Q.forEach(function(it,qi){
+      var d=document.createElement('div');d.className='q';
+      d.innerHTML='<p>'+(qi+1)+'. '+it.q+'</p><div class="opts"></div>';
+      var o=d.querySelector('.opts');
+      it.o.forEach(function(t,oi){
+        var b=document.createElement('button');b.className='opt';b.innerHTML=t;
+        b.onclick=function(){
+          if(d.dataset.done)return;d.dataset.done=1;done++;
+          if(oi===it.a){b.classList.add('right');score++;}else{b.classList.add('wrong');o.children[it.a].classList.add('right');}
+          if(done===Q.length)res.textContent='Your score: '+score+' / '+Q.length+(score===Q.length?' - Excellent.':score>=3?' - Good; review the items you missed.':' - Please revisit the lesson before the next session.');
+        };
+        o.appendChild(b);
+      });
+      qb.appendChild(d);
+    });
+    qb.appendChild(res);
+  }
+})();
+</script>
+<script>
+(function(){
+'use strict';
+/* easing race */
+var race=document.getElementById('race'),custom='cubic-bezier(.34,1.56,.64,1)';
+function setDur(){race.querySelectorAll('.ball').forEach(function(b){b.style.transition='left 1.6s '+(b.dataset.e||custom);});}
+setDur();
+document.getElementById('raceBtn').onclick=function(){race.classList.toggle('go');};
+/* bezier editor */
+var svg=document.getElementById('bzSvg'),P=[[.34,1.56],[.64,1]],drag=-1;
+function toS(p){return [20+p[0]*200,220-p[1]*200*0.7-30];}
+function fromS(x,y){return [Math.min(1,Math.max(0,(x-20)/200)),Math.round(((220-30-y)/(200*0.7))*100)/100];}
+function drawBz(){
+  var a=toS([0,0]),b=toS([1,1]),c1=toS(P[0]),c2=toS(P[1]);
+  svg.innerHTML='<rect x="20" y="'+b[1]+'" width="200" height="'+(a[1]-b[1])+'" fill="none" stroke="rgba(255,255,255,.1)"/>'+
+  '<line x1="'+a[0]+'" y1="'+a[1]+'" x2="'+c1[0]+'" y2="'+c1[1]+'" stroke="#f472b6" stroke-width="1.5"/>'+
+  '<line x1="'+b[0]+'" y1="'+b[1]+'" x2="'+c2[0]+'" y2="'+c2[1]+'" stroke="#38bdf8" stroke-width="1.5"/>'+
+  '<path d="M'+a+' C'+c1+' '+c2+' '+b+'" fill="none" stroke="#a3e635" stroke-width="3"/>'+
+  '<circle class="h" data-i="0" cx="'+c1[0]+'" cy="'+c1[1]+'" r="9" fill="#f472b6"/><circle class="h" data-i="1" cx="'+c2[0]+'" cy="'+c2[1]+'" r="9" fill="#38bdf8"/>'+
+  '<text x="22" y="236" font-size="10" fill="#8b93b8">time</text><text x="4" y="14" font-size="10" fill="#8b93b8">progress</text>';
+  custom='cubic-bezier('+P[0][0].toFixed(2)+', '+P[0][1].toFixed(2)+', '+P[1][0].toFixed(2)+', '+P[1][1].toFixed(2)+')';
+  document.getElementById('bzOut').textContent='transition-timing-function: '+custom+';';
+  var cl=document.getElementById('customLabel');if(cl)cl.textContent=custom;
+  setDur();
+}
+function pt(e){var r=svg.getBoundingClientRect(),t=e.touches?e.touches[0]:e;return [(t.clientX-r.left)*240/r.width,(t.clientY-r.top)*240/r.height];}
+svg.addEventListener('pointerdown',function(e){if(e.target.classList.contains('h')){drag=+e.target.dataset.i;svg.setPointerCapture(e.pointerId);}});
+svg.addEventListener('pointermove',function(e){if(drag<0)return;var q=pt(e);P[drag]=fromS(q[0],q[1]);drawBz();});
+svg.addEventListener('pointerup',function(){drag=-1;});
+drawBz();
+/* transform playground */
+var tc=document.getElementById('tfCard'),to=document.getElementById('tfOrigin');
+function tf(){
+  var v={};document.querySelectorAll('[data-t]').forEach(function(i){v[i.dataset.t]=i.value;document.getElementById('tv_'+i.dataset.t).textContent=i.value;});
+  var t='translateX('+v.tx+'px) rotate('+v.rot+'deg) scale('+v.sc+') skewX('+v.sk+'deg) rotateY('+v.ry+'deg)';
+  tc.style.transform=t;tc.style.transformOrigin=v.or;
+  var map={'center':[50,50],'top left':[0,0],'bottom right':[100,100],'left center':[0,50]},o=map[v.or];
+  to.style.left='calc('+o[0]+'% - 5px)';to.style.top='calc('+o[1]+'% - 5px)';
+  document.getElementById('tfCode').innerHTML=IHM.hl('.stage {\n  perspective: 700px;\n}\n.card {\n  transform-origin: '+v.or+';\n  transform: translateX('+v.tx+'px)\n             rotate('+v.rot+'deg)\n             scale('+v.sc+')\n             skewX('+v.sk+'deg)\n             rotateY('+v.ry+'deg);\n}','css');
+}
+document.querySelectorAll('[data-t]').forEach(function(i){i.addEventListener('input',tf);i.addEventListener('change',tf);});
+tf();
+})();
+</script>
+</body>
+</html>

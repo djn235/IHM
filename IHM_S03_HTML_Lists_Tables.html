@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Human-Machine Interface, Session 03: Lists & Advanced Tables. Dr. Gharbi Farouk, University of Tipaza.">
+<meta name="author" content="Dr. Gharbi Farouk">
+<title>IHM | Session 03 - Lists & Advanced Tables</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b18;--bg2:#0d1430;--card:rgba(255,255,255,.045);--card-b:rgba(255,255,255,.09);
+  --txt:#e6e9f5;--mut:#9aa3c2;
+  --a1:#6366f1;--a2:#22d3ee;--a3:#a855f7;--a4:#f472b6;
+  --ok:#34d399;--warn:#fbbf24;--bad:#f87171;
+  --trk:#fb923c;
+  --grad:linear-gradient(120deg,var(--a1),var(--a3) 45%,var(--a2));
+  --code-bg:#0a0f22;--shadow:0 20px 60px -20px rgba(0,0,0,.6);--r:20px;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5fc;--bg2:#e7ebfa;--card:rgba(255,255,255,.78);--card-b:rgba(30,41,99,.12);
+  --txt:#141a33;--mut:#56608a;--shadow:0 20px 50px -25px rgba(40,50,120,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.75;font-size:17px;overflow-x:hidden;transition:background .6s,color .6s}
+::selection{background:var(--a3);color:#fff}
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora span{position:absolute;width:55vmax;height:55vmax;border-radius:50%;filter:blur(90px);opacity:.28;animation:float 22s ease-in-out infinite}
+.aurora span:nth-child(1){background:var(--a1);top:-20vmax;left:-15vmax}
+.aurora span:nth-child(2){background:var(--a2);bottom:-25vmax;right:-15vmax;animation-delay:-7s}
+.aurora span:nth-child(3){background:var(--trk);top:30%;left:35%;width:30vmax;height:30vmax;opacity:.16;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6vw,-5vh) scale(1.12)}66%{transform:translate(-5vw,6vh) scale(.92)}}
+.grid-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.glow{position:fixed;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:-1;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 65%);transform:translate(-50%,-50%)}
+.progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--grad);z-index:100;box-shadow:0 0 18px var(--a2)}
+.topbar{position:fixed;top:4px;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:10px 22px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(7,11,24,.55);border-bottom:1px solid var(--card-b);transition:transform .4s}
+:root[data-theme="light"] .topbar{background:rgba(243,245,252,.7)}
+.topbar.hide{transform:translateY(-120%)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff;font-weight:600;box-shadow:0 0 25px rgba(168,85,247,.5)}
+.brand small{display:block;font-weight:400;color:var(--mut);font-size:12px;line-height:1.2}
+.tbtn{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:7px 16px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:14px;transition:.3s}
+.tbtn:hover{border-color:var(--a2);box-shadow:0 0 20px rgba(34,211,238,.35)}
+.sidenav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:12px}
+.sidenav a{position:relative;width:12px;height:12px;border-radius:50%;background:var(--card-b);display:block;transition:.35s}
+.sidenav a.active{background:var(--a2);box-shadow:0 0 0 5px rgba(34,211,238,.18),0 0 16px var(--a2);transform:scale(1.25)}
+.sidenav a span{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(8px);white-space:nowrap;font-size:13px;background:var(--bg2);border:1px solid var(--card-b);padding:3px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:.3s;color:var(--txt)}
+.sidenav a:hover span{opacity:1;transform:translateY(-50%) translateX(0)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+section{padding:90px 0 30px}
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:110px}
+.hero-inner{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;width:100%}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;border:1px solid var(--card-b);background:var(--card);font-size:14px;color:var(--mut)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--trk);box-shadow:0 0 10px var(--trk);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.hero h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.12;font-weight:800;margin:20px 0 16px;letter-spacing:-.02em}
+.gtxt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.hero p.lead{color:var(--mut);font-size:1.1rem;max-width:580px}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.meta div{padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);font-size:14px}
+.meta b{display:block;color:var(--a2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{position:relative;overflow:hidden;border:none;padding:13px 28px;border-radius:14px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;color:#fff;background:var(--grad);background-size:200%;box-shadow:0 10px 30px -10px var(--a3);transition:.4s;text-decoration:none;display:inline-block}
+.btn:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 18px 40px -12px var(--a3)}
+.btn.ghost{background:transparent;border:1px solid var(--card-b);color:var(--txt);box-shadow:none}
+.btn.ghost:hover{border-color:var(--a1)}
+.term{background:var(--code-bg);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);box-shadow:var(--shadow),0 0 60px -20px var(--a1);overflow:hidden;transition:transform .2s}
+.term-h{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
+.term-h i{width:11px;height:11px;border-radius:50%;background:#ff5f57}
+.term-h i:nth-child(2){background:#febc2e}.term-h i:nth-child(3){background:#28c840}
+.term-h span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5b6591}
+.term pre{padding:20px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#c9d1f5;min-height:300px;white-space:pre-wrap}
+.caret{display:inline-block;width:8px;height:17px;background:var(--a2);vertical-align:middle;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sec-h{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.num{flex:none;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:20px;color:#fff;background:var(--grad);box-shadow:0 10px 30px -10px var(--a1)}
+.sec-h h2{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.25;letter-spacing:-.01em}
+.sec-h small{display:block;color:var(--mut);font-size:13px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+h3{font-size:1.22rem;margin:26px 0 10px;color:var(--a2)}
+h4{margin:16px 0 6px}
+p{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);padding:26px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);margin-bottom:20px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(140deg,rgba(99,102,241,.5),transparent 40%,transparent 60%,rgba(34,211,238,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.card>h3:first-child{margin-top:0}
+code.i{font-family:'JetBrains Mono',monospace;font-size:.84em;background:rgba(99,102,241,.16);color:#a5b4fc;padding:1px 7px;border-radius:6px;white-space:nowrap}
+:root[data-theme="light"] code.i{color:#4338ca}
+ul.list{list-style:none;margin:8px 0 14px}
+ul.list li{position:relative;padding-left:26px;margin-bottom:6px}
+ul.list li::before{content:"";position:absolute;left:4px;top:11px;width:9px;height:9px;border-radius:3px;background:var(--grad);transform:rotate(45deg)}
+ol.steps{margin:8px 0 14px 22px}
+ol.steps li{margin-bottom:6px;padding-left:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.note{border-left:4px solid var(--a2);background:rgba(34,211,238,.07);padding:14px 18px;border-radius:12px;margin:16px 0}
+.note.warn{border-color:var(--warn);background:rgba(251,191,36,.07)}
+.note.ok{border-color:var(--ok);background:rgba(52,211,153,.07)}
+.note.def{border-color:var(--a3);background:rgba(168,85,247,.08)}
+.note b:first-child{display:block;margin-bottom:2px}
+.obj{display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--card-b);transition:.4s}
+.obj:hover{transform:translateY(-6px);border-color:var(--a3);box-shadow:0 20px 40px -20px var(--a3)}
+.obj .n{flex:none;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--a2);font-size:22px;line-height:1.3}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.track{border-radius:var(--r);padding:20px;background:var(--card);border:1px solid var(--card-b)}
+.track h4{font-family:'JetBrains Mono',monospace;font-size:18px;margin:0 0 12px}
+.track.html h4{color:#fb923c}.track.css h4{color:#38bdf8}.track.js h4{color:#facc15}
+.step{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;border:1px solid transparent;transition:.3s;text-decoration:none;color:inherit}
+.step b{font-family:'JetBrains Mono',monospace;font-size:12px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.07)}
+.step.done{opacity:.62}.step.done b{background:var(--ok);color:#052e1f}
+.step.now{border-color:var(--a2);background:rgba(34,211,238,.09);box-shadow:0 0 25px -8px var(--a2)}
+.step.now b{background:var(--a2);color:#062029}
+.step:hover{background:rgba(255,255,255,.05)}
+.code{margin:16px 0;border-radius:16px;overflow:hidden;background:var(--code-bg);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow)}
+.code-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
+.code-h .lbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b93b8;display:flex;gap:8px;align-items:center}
+.code-h .lbl::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--dot,#fb923c);box-shadow:0 0 8px var(--dot,#fb923c)}
+.code[data-lang="css"]{--dot:#38bdf8}.code[data-lang="js"]{--dot:#facc15}
+.code-h .acts{display:flex;gap:6px}
+.code-h button{font-family:inherit;font-size:12px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#c9d1f5;padding:3px 12px;border-radius:8px;cursor:pointer;transition:.25s}
+.code-h button:hover,.code-h button.on{background:var(--a1);border-color:var(--a1)}
+.code pre{padding:18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;color:#d5dbf5}
+.code pre .ln{display:block;padding-left:42px;position:relative;white-space:pre}
+.code pre .ln::before{content:attr(data-n);position:absolute;left:0;width:28px;text-align:right;color:#3d4670;font-size:12px}
+.code textarea{display:block;width:100%;min-height:260px;padding:18px;border:0;outline:0;resize:vertical;background:#070b1a;color:#e6e9f5;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;tab-size:2;white-space:pre}
+.t-tag{color:#f472b6}.t-att{color:#7dd3fc}.t-str{color:#a3e635}.t-com{color:#5b6591;font-style:italic}.t-ent{color:#fbbf24}.t-pun{color:#8b93b8}
+.t-kw{color:#c084fc}.t-num{color:#fb923c}.t-fn{color:#38bdf8}.t-sel{color:#f9a8d4}.t-prop{color:#7dd3fc}.t-at{color:#c084fc}
+.preview{display:none;border-top:1px solid rgba(255,255,255,.08);background:#fff}
+.preview.open{display:block;animation:drop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes drop{from{opacity:0;transform:translateY(-10px)}}
+.preview iframe{width:100%;height:360px;border:0;display:block;background:#fff}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;font-size:15px;border-radius:14px;overflow:hidden;border:1px solid var(--card-b)}
+.tbl th{background:linear-gradient(120deg,rgba(99,102,241,.35),rgba(168,85,247,.25));padding:11px;text-align:left}
+.tbl td{padding:10px 11px;border-top:1px solid var(--card-b);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.035)}
+.tblw{overflow-x:auto}
+.ex{border-radius:var(--r);background:var(--card);border:1px solid var(--card-b);margin-bottom:22px;overflow:hidden;box-shadow:var(--shadow)}
+.ex-h{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(120deg,rgba(99,102,241,.14),transparent)}
+.ex-h .tag{font-family:'JetBrains Mono',monospace;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--grad);color:#fff;font-size:14px;white-space:nowrap}
+.ex-h h3{margin:0;color:var(--txt);font-size:1.12rem}
+.lvl-b{margin-left:auto;font-size:12px;padding:3px 12px;border-radius:999px;border:1px solid;white-space:nowrap}
+.lvl-b.m{color:var(--warn);border-color:var(--warn)}.lvl-b.a{color:var(--bad);border-color:var(--bad)}.lvl-b.e{color:var(--ok);border-color:var(--ok)}
+.ex-b{padding:6px 24px 22px}
+.sol-btn{margin-top:10px}
+.sol{max-height:0;overflow:hidden;transition:max-height .8s cubic-bezier(.2,.8,.2,1)}
+.sol-in{padding-top:14px}
+.hw{position:relative;border-radius:26px;padding:34px;background:linear-gradient(135deg,rgba(99,102,241,.22),rgba(168,85,247,.16) 50%,rgba(34,211,238,.16));border:1px solid rgba(168,85,247,.4);overflow:hidden}
+.hw::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:var(--a2);filter:blur(120px);opacity:.25;top:-100px;right:-80px;pointer-events:none}
+.hw h3{font-size:1.5rem;margin-top:0;color:var(--txt)}
+.dead{display:inline-block;margin-top:14px;padding:8px 18px;border-radius:12px;background:rgba(0,0,0,.25);font-weight:700}
+:root[data-theme="light"] .dead{background:rgba(255,255,255,.6)}
+.q{margin-bottom:18px}
+.q p{font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:11px 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:15px;text-align:left;transition:.3s}
+.opt:hover{border-color:var(--a1);transform:translateX(4px)}
+.opt.right{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.13);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+.score{font-size:1.2rem;font-weight:700;margin-top:10px}
+.refs li{margin-bottom:6px}
+.refs a{color:var(--a2)}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+/* widgets shared */
+.ctl{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut);min-width:150px;flex:1}
+.ctl select,.ctl input[type=text],.ctl input[type=number]{font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 10px;border-radius:10px;border:1px solid var(--card-b);background:var(--bg2);color:var(--txt)}
+.ctl input[type=range]{accent-color:var(--a2)}
+.stage{border-radius:14px;border:1px dashed var(--card-b);padding:14px;background:rgba(0,0,0,.18);min-height:120px}
+:root[data-theme="light"] .stage{background:rgba(255,255,255,.5)}
+.mono{font-family:'JetBrains Mono',monospace}
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(99,102,241,.18);color:#c7d2fe;margin:2px}
+:root[data-theme="light"] .pill{color:#3730a3}
+footer{margin-top:80px;padding:40px 0;border-top:1px solid var(--card-b);text-align:center;color:var(--mut);font-size:14px}
+footer b{color:var(--txt)}
+footer a{color:var(--a2);text-decoration:none}
+.toTop{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:14px;border:none;background:var(--grad);color:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;cursor:pointer;opacity:0;transform:translateY(20px);transition:.4s;z-index:80;box-shadow:0 10px 30px -10px var(--a3)}
+.toTop.show{opacity:1;transform:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,140px);background:var(--grad);color:#fff;padding:10px 24px;border-radius:12px;font-weight:700;z-index:200;transition:.4s}
+.toast.show{transform:translate(-50%,0)}
+.spanlab{display:grid;grid-template-columns:1fr 1.2fr;gap:20px;align-items:start}
+.spantbl{border-collapse:collapse;width:100%;font-family:'JetBrains Mono',monospace;font-size:13px}
+.spantbl td{border:1px solid rgba(255,255,255,.18);height:52px;text-align:center;transition:.4s;background:rgba(255,255,255,.03)}
+:root[data-theme="light"] .spantbl td{border-color:rgba(30,41,99,.25)}
+.spantbl td.m{background:linear-gradient(135deg,rgba(99,102,241,.55),rgba(34,211,238,.45));color:#fff;font-weight:600;animation:pop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{transform:scale(.85);opacity:.3}}
+.spanlab .code{margin-top:0}
+.spanlab .code pre{max-height:330px;overflow:auto}
+.demo-list ol,.demo-list ul{margin-left:22px}
+@media (max-width:900px){.spanlab{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .hero-inner,.grid2,.road{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .sidenav{display:none}
+  .term{display:none}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .grid3,.opts{grid-template-columns:1fr}
+  .brand small{display:none}
+  .card,.hw{padding:20px}
+  .ex-h{flex-wrap:wrap;padding:16px}
+  .lvl-b{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="grid-bg"></div>
+<div class="glow" id="glow"></div>
+<div class="progress" id="progress"></div>
+
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <div class="logo">IHM</div>
+    <div>Human-Machine Interface<small>Business Computing &middot; Year 1 &middot; Session 03</small></div>
+  </div>
+  <button class="tbtn" id="themeBtn">Light mode</button>
+</header>
+<nav class="sidenav" id="sidenav" aria-label="Section navigation"></nav>
+
+<section class="hero" id="home" data-title="Overview">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="chip rv"><i></i> Session 03 of 12 &middot; HTML Track</span>
+      <h1 class="rv d1">Lists &amp; Advanced<br><span class="gtxt">Data Tables</span></h1>
+      <p class="lead rv d2">Structuring enumerations, sequences and definitions, then modelling tabular business data with row and column groups, cell spanning and the header associations that make tables intelligible to assistive technologies.</p>
+      <div class="meta rv d3">
+        <div><b>Institution</b>University of Tipaza</div>
+        <div><b>Faculty</b>Economics, Commerce &amp; Management Sciences</div>
+        <div><b>Lecturer</b>Dr. Gharbi Farouk</div>
+        <div><b>Duration</b>90 minutes</div>
+      </div>
+      <div class="cta rv d3">
+        <a class="btn" href="#s1">Start the lecture</a>
+        <a class="btn ghost" href="#exercises">Practical exercises</a>
+      </div>
+    </div>
+    <div class="term rv d2" id="term">
+      <div class="term-h"><i></i><i></i><i></i><span>income-statement.html</span></div>
+      <pre id="typed"></pre>
+    </div>
+  </div>
+</section>
+<section id="goals" data-title="Learning outcomes"><div class="wrap">
+  <div class="sec-h rv"><div class="num">00</div><h2>Learning Outcomes<small>By the end of this session, students will be able to</small></h2></div>
+  <div class="grid2"><div class="obj rv d0"><div class="n">01</div><div>Choose between unordered, ordered and description lists according to the semantics of the content, including nested lists.</div></div><div class="obj rv d1"><div class="n">02</div><div>Construct data tables with <code class="i">caption</code>, <code class="i">thead</code>, <code class="i">tbody</code>, <code class="i">tfoot</code> and column groups.</div></div><div class="obj rv d2"><div class="n">03</div><div>Merge cells correctly with <code class="i">colspan</code> and <code class="i">rowspan</code> while preserving the table grid.</div></div><div class="obj rv d3"><div class="n">04</div><div>Associate header and data cells with <code class="i">scope</code> and <code class="i">headers</code> to produce accessible business tables.</div></div></div>
+  <h3 class="rv" style="margin-top:40px">Course roadmap: 12 sessions</h3>
+  <div class="road"><div class="track html rv"><h4>HTML</h4><a class="step done" href="IHM_S01_HTML_Semantic_Structure.html"><b>01</b>Semantic Document Structure</a><a class="step done" href="IHM_S02_HTML_Links_Multimedia.html"><b>02</b>Hyperlinks &amp; Multimedia</a><a class="step now" href="IHM_S03_HTML_Lists_Tables.html"><b>03</b>Lists &amp; Advanced Tables</a><a class="step " href="IHM_S04_HTML_Forms_Accessibility.html"><b>04</b>Forms &amp; Accessibility</a></div><div class="track css rv"><h4>CSS</h4><a class="step " href="IHM_S05_CSS_Selectors_Cascade_BoxModel.html"><b>05</b>Selectors, Cascade &amp; Box Model</a><a class="step " href="IHM_S06_CSS_Flexbox_Grid.html"><b>06</b>Flexbox &amp; Grid Layout</a><a class="step " href="IHM_S07_CSS_Responsive_Design.html"><b>07</b>Responsive Design</a><a class="step " href="IHM_S08_CSS_Transitions_Animations.html"><b>08</b>Transitions &amp; Animations</a></div><div class="track js rv"><h4>JavaScript</h4><a class="step " href="IHM_S09_JS_Fundamentals.html"><b>09</b>Variables, Types &amp; Control Flow</a><a class="step " href="IHM_S10_JS_Functions_Arrays_Objects.html"><b>10</b>Functions, Arrays &amp; Objects</a><a class="step " href="IHM_S11_JS_DOM_Events.html"><b>11</b>DOM Manipulation &amp; Events</a><a class="step " href="IHM_S12_JS_Integrated_Project.html"><b>12</b>Integrated Interface Project</a></div></div>
+  <div class="note rv"><b>Recap of the previous session</b>Session 02 covered URL resolution, hyperlinks, responsive images, native media and secure embedding. Today we turn to the two structures that organise information most densely: lists and tables.</div>
+</div></section>
+<section id="s1" data-title="Lists"><div class="wrap"><div class="sec-h rv"><div class="num">01</div><h2>Lists and Their Semantics<small>ul, ol, li and nesting</small></h2></div>
+<div class="card rv">
+<p>The choice of list element is a <b>semantic decision</b>, not a stylistic one. The question to ask is: <i>would changing the order of the items change the meaning?</i></p>
+<div class="grid2">
+<div class="obj"><div><code class="i">ul</code> <b>Unordered list</b><br>A set of items whose order is not significant: product features, navigation menus, required documents.</div></div>
+<div class="obj"><div><code class="i">ol</code> <b>Ordered list</b><br>A sequence where order carries meaning: procedural steps, rankings, legal clauses.</div></div>
+</div>
+<div class="tblw"><table class="tbl">
+<tr><th>Attribute of ol</th><th>Effect</th><th>Example</th></tr>
+<tr><td><code class="i">type</code></td><td>Numbering style: 1, a, A, i, I</td><td><code class="i">type="I"</code> for chapters</td></tr>
+<tr><td><code class="i">start</code></td><td>Initial ordinal value</td><td><code class="i">start="5"</code> continues a list</td></tr>
+<tr><td><code class="i">reversed</code></td><td>Descending numbering</td><td>Top-10 rankings</td></tr>
+<tr><td><code class="i">value</code> (on li)</td><td>Forces the ordinal of one item</td><td><code class="i">&lt;li value="10"&gt;</code></td></tr>
+</table></div>
+</div>
+<div class="code" data-src="c-lists" data-label="lists.html" data-lang="html" data-run></div>
+<div class="note warn rv"><b>Content model constraint</b>The only permitted children of <code class="i">ul</code> and <code class="i">ol</code> are <code class="i">li</code> elements (and script-supporting elements). A nested list must therefore be placed <b>inside</b> an <code class="i">li</code>, never directly inside the parent list.</div>
+</div></section>
+
+<section id="s2" data-title="Description lists"><div class="wrap"><div class="sec-h rv"><div class="num">02</div><h2>Description Lists<small>dl, dt and dd</small></h2></div>
+<div class="card rv">
+<p>A <b>description list</b> represents an association list of name-value groups: terms and definitions, metadata keys and values, questions and answers. A <code class="i">dt</code> (term) may be followed by one or several <code class="i">dd</code> (descriptions), and several terms may share one description.</p>
+<p>HTML5 also allows each name-value group to be wrapped in a <code class="i">div</code> inside <code class="i">dl</code>, which is useful for styling groups.</p>
+</div>
+<div class="code" data-src="c-dl" data-label="glossary.html" data-lang="html" data-run></div>
+<div class="note def rv"><b>Typical business uses</b>Glossaries of financial terms, product specification sheets ("Processor: Intel i7"), invoice metadata ("Invoice no.: 2026-0451", "Due date: 30/11/2026") and frequently asked questions.</div>
+</div></section>
+
+<section id="s3" data-title="Table basics"><div class="wrap"><div class="sec-h rv"><div class="num">03</div><h2>Table Fundamentals<small>table, tr, th, td and caption</small></h2></div>
+<div class="card rv">
+<p>A table is a <b>two-dimensional data structure</b>: each data cell is defined by the intersection of a row and a column, and its meaning depends on the corresponding headers. Tables must be reserved for <b>tabular data</b>. Using them to lay out a page, a common practice in the 1990s, is an obsolete technique that harms accessibility; layout is the role of CSS Grid and Flexbox (Session 06).</p>
+<div class="grid3">
+<div class="obj"><div><code class="i">tr</code><br>Table row: a horizontal sequence of cells.</div></div>
+<div class="obj"><div><code class="i">th</code><br>Header cell: labels a row or a column; bold and centred by default.</div></div>
+<div class="obj"><div><code class="i">td</code><br>Data cell: holds a value.</div></div>
+</div>
+<p style="margin-top:14px"><code class="i">caption</code>, which must be the <b>first child</b> of <code class="i">table</code>, provides the table's title. It is announced first by screen readers and allows users to decide whether to explore the table.</p>
+</div>
+<div class="code" data-src="c-basic" data-label="basic-table.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s4" data-title="Row and column groups"><div class="wrap"><div class="sec-h rv"><div class="num">04</div><h2>Structural Groups<small>thead, tbody, tfoot, colgroup and col</small></h2></div>
+<div class="card rv">
+<p>Row groups partition a table into a header, one or more bodies, and a footer. They convey structure to assistive technologies, allow headers and footers to repeat on each printed page, and provide hooks for styling and scripting.</p>
+<ul class="list">
+<li><code class="i">thead</code>: rows of column headers.</li>
+<li><code class="i">tbody</code>: data rows. A table may contain <b>several</b> <code class="i">tbody</code> elements to separate logical groups (e.g. operating and financial items).</li>
+<li><code class="i">tfoot</code>: summary rows such as totals and averages.</li>
+<li><code class="i">colgroup</code> / <code class="i">col</code>: column groups, used to style entire columns (width, background) without repeating classes on every cell.</li>
+</ul>
+</div>
+<div class="code" data-src="c-groups" data-label="income-statement.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s5" data-title="Cell spanning"><div class="wrap"><div class="sec-h rv"><div class="num">05</div><h2>Cell Spanning<small>colspan and rowspan</small></h2></div>
+<div class="card rv">
+<p><code class="i">colspan</code> extends a cell across several columns; <code class="i">rowspan</code> across several rows. The essential rule is the <b>preservation of the grid</b>: every slot covered by a spanning cell must be <i>removed</i> from the markup of the affected rows. Forgetting to remove them produces extra cells that overflow the grid, the most frequent error in student work.</p>
+<h3>Interactive spanning laboratory</h3>
+<p>Choose the origin cell and the span. Observe both the rendering and the generated markup.</p>
+<div class="ctl">
+<label>Origin row: <b id="sv_r"></b><input type="range" id="sp_r" min="0" max="3"></label>
+<label>Origin column: <b id="sv_c"></b><input type="range" id="sp_c" min="0" max="3"></label>
+<label>rowspan: <b id="sv_rs"></b><input type="range" id="sp_rs" min="1" max="4"></label>
+<label>colspan: <b id="sv_cs"></b><input type="range" id="sp_cs" min="1" max="4"></label>
+</div>
+<div class="spanlab">
+<div><table class="spantbl" id="spanVis"></table><div class="note" id="spanNote"></div></div>
+<div class="code" style="margin-top:0"><div class="code-h"><span class="lbl">generated.html</span></div><pre id="spanCode"></pre></div>
+</div>
+</div>
+<div class="code" data-src="c-span" data-label="timetable.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s6" data-title="Accessible tables"><div class="wrap"><div class="sec-h rv"><div class="num">06</div><h2>Accessible Data Tables<small>scope, headers and id</small></h2></div>
+<div class="card rv">
+<p>A sighted user relates a cell to its headers visually. A screen-reader user relies on programmatic associations, so that on reaching a cell the software announces, for example, "Q2, North region, 340 000". Two mechanisms exist:</p>
+<div class="tblw"><table class="tbl">
+<tr><th>Mechanism</th><th>Use</th><th>Values</th></tr>
+<tr><td><code class="i">scope</code> on th</td><td>Simple and two-header tables (the vast majority)</td><td><code class="i">col</code>, <code class="i">row</code>, <code class="i">colgroup</code>, <code class="i">rowgroup</code></td></tr>
+<tr><td><code class="i">headers</code> on td/th</td><td>Irregular or multi-level tables</td><td>A space-separated list of header <code class="i">id</code>s</td></tr>
+<tr><td><code class="i">abbr</code> on th</td><td>A short form of a long header, read repeatedly</td><td><code class="i">abbr="Revenue"</code></td></tr>
+</table></div>
+</div>
+<div class="code" data-src="c-headers" data-label="multi-level.html" data-lang="html" data-run></div>
+<div class="note ok rv"><b>Checklist for a professional data table</b>A descriptive <code class="i">caption</code>; every header in a <code class="i">th</code> with <code class="i">scope</code>; row groups declared; totals in <code class="i">tfoot</code>; units stated in headers ("Amount (DZD)") rather than repeated in each cell; and no empty cells used merely for spacing.</div>
+</div></section>
+
+<section id="exercises" data-title="Exercises"><div class="wrap"><div class="sec-h rv"><div class="num">07</div><h2>Practical Exercises<small>Model, structure, associate</small></h2></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 01</span><h3>Module syllabus and glossary</h3><span class="lvl-b e">Foundational</span></div><div class="ex-b">
+<p>Mark up the syllabus of the IHM module:</p>
+<ul class="list"><li>An ordered list of the three tracks (HTML, CSS, JavaScript) numbered in upper-case Roman numerals, each containing a nested ordered list of its four sessions numbered continuously from 1 to 12 (use <code class="i">start</code>).</li><li>An unordered list of the required software (code editor, two browsers, validator).</li><li>A description list defining four terms: DOM, URL, Responsive design, Accessibility.</li></ul>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol1" data-label="solution-01.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 02</span><h3>Weekly timetable with merged cells</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Produce the weekly timetable of a Business Computing group (Sunday to Thursday, four time slots). Requirements:</p>
+<ul class="list"><li>A caption, a header row of days, and the time slots as row headers with the correct <code class="i">scope</code>.</li><li>The "Human-Machine Interface" lecture lasts two consecutive slots on Sunday (<code class="i">rowspan</code>).</li><li>A "Midday break" row spans the five days (<code class="i">colspan</code>).</li><li>Verify that each row accounts for exactly six columns.</li></ul>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol2" data-label="solution-02.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 03</span><h3>Accessible balance sheet</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Model a simplified balance sheet of a company as a single table with two <code class="i">tbody</code> groups (Assets and Liabilities &amp; Equity). Each group starts with a header row spanning both columns with <code class="i">scope="rowgroup"</code>; each item is a row header; amounts are right-aligned via a <code class="i">col</code>; group totals and the overall total appear in <code class="i">tfoot</code>.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol3" data-label="solution-03.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 04</span><h3>Multi-level sales report</h3><span class="lvl-b a">Advanced</span></div><div class="ex-b">
+<p>Build a table of sales by region (North, Centre, South) and by period, where the columns are grouped into two semesters (H1 and H2), each spanning two quarters. Since a data cell depends on three headers (region, semester, quarter), use <code class="i">id</code> and <code class="i">headers</code> to make every association explicit. Add an annual total column.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol4" data-label="solution-04.html" data-lang="html" data-run></div>
+<div class="note"><b>Why headers here?</b>With two header rows, <code class="i">scope="col"</code> on the quarter cells is not sufficient for every screen reader to also associate the semester. The <code class="i">headers</code> attribute lists, for each <code class="i">td</code>, the ids of <i>all</i> its headers, which makes the association unambiguous.</div></div></div>
+</div></div>
+</div></section>
+
+<section id="quiz" data-title="Quick quiz"><div class="wrap"><div class="sec-h rv"><div class="num">08</div><h2>Check Your Understanding<small>Formative assessment</small></h2></div><div class="card rv" id="quizBox"></div></div></section>
+
+<section id="homework" data-title="Homework"><div class="wrap"><div class="sec-h rv"><div class="num">09</div><h2>Homework Assignment<small>Individual work, to be submitted</small></h2></div>
+<div class="hw rv">
+<h3>A software plan comparison page</h3>
+<p>A start-up markets a cloud accounting application in three plans (Starter, Business, Enterprise). Produce <code class="i">lastname_firstname_TP3.html</code>, without CSS, containing:</p>
+<ul class="list">
+<li>An introduction with an unordered list of the target customers and an ordered list of the five subscription steps.</li>
+<li>A comparison table: plans as columns, features as row headers, grouped into at least two <code class="i">tbody</code> sections (Accounting, Collaboration) with group header rows.</li>
+<li>A price row in <code class="i">thead</code> using a merged cell for "Price per month (DZD)", and a footer row recommending a plan.</li>
+<li>Correct <code class="i">scope</code> on every header, a meaningful <code class="i">caption</code> and column groups.</li>
+<li>A FAQ at the end of the page as a description list of at least four questions.</li>
+</ul>
+<p><b>Assessment criteria:</b> table structure and grid integrity 35% &middot; accessibility associations 25% &middot; semantic choice of lists 20% &middot; validity 20%.</p>
+<span class="dead">Deadline: beginning of Session 04</span>
+</div>
+</div></section>
+<section id="refs" data-title="Further reading"><div class="wrap"><div class="sec-h rv"><div class="num">10</div><h2>References &amp; Further Reading<small>Primary specifications and reference documentation</small></h2></div><div class="card rv"><ol class="steps refs"><li>WHATWG. <i>HTML Living Standard</i>, 4.4 Grouping content (lists) and 4.9 Tabular data. <a href="https://html.spec.whatwg.org/" target="_blank" rel="noopener noreferrer">html.spec.whatwg.org</a></li><li>W3C WAI. <i>Tables Tutorial</i> (one header, two headers, irregular and multi-level tables). <a href="https://www.w3.org/WAI/tutorials/tables/" target="_blank" rel="noopener noreferrer">w3.org/WAI/tutorials/tables</a></li><li>MDN. <i>HTML table advanced features and accessibility</i>. <a href="https://developer.mozilla.org/en-US/docs/Learn/HTML/Tables/Advanced" target="_blank" rel="noopener noreferrer">developer.mozilla.org</a></li></ol></div></div></section><footer><div class="wrap">
+  <p><b>Dr. Gharbi Farouk</b> &middot; Human-Machine Interface (IHM)</p>
+  <p>Faculty of Economics, Commerce &amp; Management Sciences &middot; University of Tipaza &middot; Academic year 2026/2027</p>
+  <p style="margin-top:8px">Previous: <a href="IHM_S02_HTML_Links_Multimedia.html">Hyperlinks &amp; Multimedia</a> &middot; Next: <a href="IHM_S04_HTML_Forms_Accessibility.html">Forms &amp; Accessibility</a></p>
+</div></footer>
+
+<button class="toTop" id="toTop" aria-label="Back to top">TOP</button>
+<div class="toast" id="toast">Copied to clipboard</div>
+
+
+<script type="text/plain" id="c-lists">
+<h3>Documents required for registration</h3>
+<ul>
+  <li>Baccalaureate certificate</li>
+  <li>Birth certificate</li>
+  <li>Two photographs</li>
+</ul>
+
+<h3>Procedure for creating a micro-enterprise</h3>
+<ol>
+  <li>Choose the legal form</li>
+  <li>Register with the trade register
+    <ol type="a">
+      <li>Reserve the company name</li>
+      <li>Submit the file</li>
+    </ol>
+  </li>
+  <li>Obtain the tax identification number</li>
+</ol>
+
+<h3>Top 3 Algerian exports (reversed)</h3>
+<ol reversed>
+  <li>Processed food products</li>
+  <li>Fertilisers</li>
+  <li>Hydrocarbons</li>
+</ol>
+</script>
+<script type="text/plain" id="c-dl">
+<h3>Glossary of accounting terms</h3>
+<dl>
+  <dt>Assets</dt>
+  <dd>Resources controlled by the entity from which future economic benefits are expected.</dd>
+
+  <dt>Liabilities</dt>
+  <dd>Present obligations of the entity arising from past events.</dd>
+
+  <dt>EBITDA</dt>
+  <dt>Gross operating surplus</dt>
+  <dd>Earnings before interest, taxes, depreciation and amortisation.</dd>
+</dl>
+
+<h3>Invoice metadata</h3>
+<dl>
+  <div><dt>Invoice no.</dt><dd>2026-0451</dd></div>
+  <div><dt>Issue date</dt><dd><time datetime="2026-10-26">26/10/2026</time></dd></div>
+  <div><dt>Due date</dt><dd><time datetime="2026-11-30">30/11/2026</time></dd></div>
+</dl>
+</script>
+<script type="text/plain" id="c-basic">
+<table border="1">
+  <caption>Monthly sales by product (units)</caption>
+  <tr>
+    <th scope="col">Product</th>
+    <th scope="col">January</th>
+    <th scope="col">February</th>
+  </tr>
+  <tr>
+    <th scope="row">Laptop</th>
+    <td>120</td>
+    <td>135</td>
+  </tr>
+  <tr>
+    <th scope="row">Printer</th>
+    <td>45</td>
+    <td>52</td>
+  </tr>
+</table>
+</script>
+<script type="text/plain" id="c-groups">
+<table border="1">
+  <caption>Simplified income statement, fiscal year 2025 (DZD)</caption>
+  <colgroup>
+    <col>
+    <col span="2" style="background:#eef2ff">
+  </colgroup>
+  <thead>
+    <tr>
+      <th scope="col">Item</th>
+      <th scope="col">2024</th>
+      <th scope="col">2025</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><th scope="row">Revenue</th><td>1 100 000</td><td>1 250 000</td></tr>
+    <tr><th scope="row">Cost of sales</th><td>-620 000</td><td>-690 000</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="row">Operating expenses</th><td>-210 000</td><td>-230 000</td></tr>
+    <tr><th scope="row">Financial expenses</th><td>-40 000</td><td>-35 000</td></tr>
+  </tbody>
+  <tfoot>
+    <tr><th scope="row">Net income</th><td>230 000</td><td>295 000</td></tr>
+  </tfoot>
+</table>
+</script>
+<script type="text/plain" id="c-span">
+<table border="1">
+  <caption>Monday timetable</caption>
+  <tr>
+    <th scope="col">Time</th>
+    <th scope="col">Group A</th>
+    <th scope="col">Group B</th>
+  </tr>
+  <tr>
+    <th scope="row">08:00</th>
+    <td colspan="2">Lecture: Microeconomics (both groups)</td>
+  </tr>
+  <tr>
+    <th scope="row">09:30</th>
+    <td rowspan="2">Lab: IHM</td>
+    <td>Tutorial: Statistics</td>
+  </tr>
+  <tr>
+    <th scope="row">11:00</th>
+    <!-- Group A slot is covered by the rowspan above -->
+    <td>Tutorial: Accounting</td>
+  </tr>
+</table>
+</script>
+<script type="text/plain" id="c-headers">
+<table border="1">
+  <caption>Sales by region and semester (thousand DZD)</caption>
+  <thead>
+    <tr>
+      <td></td>
+      <th id="s1" scope="colgroup" colspan="2">Semester 1</th>
+    </tr>
+    <tr>
+      <td></td>
+      <th id="q1" headers="s1">Q1</th>
+      <th id="q2" headers="s1">Q2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="north" scope="row">North</th>
+      <td headers="north s1 q1">310</td>
+      <td headers="north s1 q2">340</td>
+    </tr>
+    <tr>
+      <th id="south" scope="row">South</th>
+      <td headers="south s1 q1">180</td>
+      <td headers="south s1 q2">205</td>
+    </tr>
+  </tbody>
+</table>
+</script>
+<script type="text/plain" id="sol1">
+<h2>IHM module syllabus</h2>
+<ol type="I">
+  <li>HTML
+    <ol start="1">
+      <li>Semantic document structure</li>
+      <li>Hyperlinks and multimedia</li>
+      <li>Lists and advanced tables</li>
+      <li>Forms and accessibility</li>
+    </ol>
+  </li>
+  <li>CSS
+    <ol start="5">
+      <li>Selectors, cascade and box model</li>
+      <li>Flexbox and Grid layout</li>
+      <li>Responsive design</li>
+      <li>Transitions and animations</li>
+    </ol>
+  </li>
+  <li>JavaScript
+    <ol start="9">
+      <li>Variables, types and control flow</li>
+      <li>Functions, arrays and objects</li>
+      <li>DOM manipulation and events</li>
+      <li>Integrated interface project</li>
+    </ol>
+  </li>
+</ol>
+
+<h2>Required software</h2>
+<ul>
+  <li>A code editor (Visual Studio Code)</li>
+  <li>Two modern browsers (Firefox and Chrome)</li>
+  <li>The W3C Markup Validation Service</li>
+</ul>
+
+<h2>Glossary</h2>
+<dl>
+  <dt><abbr title="Document Object Model">DOM</abbr></dt>
+  <dd>The tree representation of a document built by the browser.</dd>
+  <dt><abbr title="Uniform Resource Locator">URL</abbr></dt>
+  <dd>The address that locates a resource on the Web.</dd>
+  <dt>Responsive design</dt>
+  <dd>An approach in which the layout adapts to the characteristics of the device.</dd>
+  <dt>Accessibility</dt>
+  <dd>The degree to which an interface is usable by people with disabilities.</dd>
+</dl>
+</script>
+<script type="text/plain" id="sol2">
+<table border="1">
+  <caption>Weekly timetable, Business Computing, Year 1, Group 2</caption>
+  <thead>
+    <tr>
+      <td></td>
+      <th scope="col">Sunday</th>
+      <th scope="col">Monday</th>
+      <th scope="col">Tuesday</th>
+      <th scope="col">Wednesday</th>
+      <th scope="col">Thursday</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">08:00 - 09:30</th>
+      <td rowspan="2">Human-Machine Interface (lecture)</td>
+      <td>Microeconomics</td>
+      <td>Statistics</td>
+      <td>Accounting</td>
+      <td>English</td>
+    </tr>
+    <tr>
+      <th scope="row">09:30 - 11:00</th>
+      <!-- Sunday is covered by the rowspan -->
+      <td>Mathematics</td>
+      <td>Accounting</td>
+      <td>IHM (lab)</td>
+      <td>Algorithmics</td>
+    </tr>
+    <tr>
+      <th scope="row">11:00 - 12:30</th>
+      <td colspan="5">Midday break</td>
+    </tr>
+    <tr>
+      <th scope="row">12:30 - 14:00</th>
+      <td>Management</td>
+      <td>Algorithmics (lab)</td>
+      <td>Law</td>
+      <td>Statistics (tutorial)</td>
+      <td>Free</td>
+    </tr>
+  </tbody>
+</table>
+</script>
+<script type="text/plain" id="sol3">
+<table border="1">
+  <caption>Balance sheet at 31 December 2025 (DZD)</caption>
+  <colgroup>
+    <col>
+    <col style="text-align:right;width:160px">
+  </colgroup>
+  <thead>
+    <tr><th scope="col">Item</th><th scope="col">Amount (DZD)</th></tr>
+  </thead>
+  <tbody>
+    <tr><th scope="rowgroup" colspan="2">Assets</th></tr>
+    <tr><th scope="row">Fixed assets</th><td align="right">2 400 000</td></tr>
+    <tr><th scope="row">Inventories</th><td align="right">650 000</td></tr>
+    <tr><th scope="row">Receivables</th><td align="right">420 000</td></tr>
+    <tr><th scope="row">Cash</th><td align="right">330 000</td></tr>
+  </tbody>
+  <tbody>
+    <tr><th scope="rowgroup" colspan="2">Liabilities and equity</th></tr>
+    <tr><th scope="row">Share capital</th><td align="right">2 000 000</td></tr>
+    <tr><th scope="row">Retained earnings</th><td align="right">700 000</td></tr>
+    <tr><th scope="row">Long-term debt</th><td align="right">750 000</td></tr>
+    <tr><th scope="row">Trade payables</th><td align="right">350 000</td></tr>
+  </tbody>
+  <tfoot>
+    <tr><th scope="row">Total assets</th><td align="right">3 800 000</td></tr>
+    <tr><th scope="row">Total liabilities and equity</th><td align="right">3 800 000</td></tr>
+  </tfoot>
+</table>
+</script>
+<script type="text/plain" id="sol4">
+<table border="1">
+  <caption>Annual sales by region, semester and quarter (thousand DZD)</caption>
+  <thead>
+    <tr>
+      <td rowspan="2"></td>
+      <th id="h1" colspan="2" scope="colgroup">Semester 1</th>
+      <th id="h2" colspan="2" scope="colgroup">Semester 2</th>
+      <th id="tot" rowspan="2" scope="col">Annual total</th>
+    </tr>
+    <tr>
+      <th id="q1" headers="h1">Q1</th>
+      <th id="q2" headers="h1">Q2</th>
+      <th id="q3" headers="h2">Q3</th>
+      <th id="q4" headers="h2">Q4</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="r1" scope="row">North</th>
+      <td headers="r1 h1 q1">310</td><td headers="r1 h1 q2">340</td>
+      <td headers="r1 h2 q3">295</td><td headers="r1 h2 q4">380</td>
+      <td headers="r1 tot">1325</td>
+    </tr>
+    <tr>
+      <th id="r2" scope="row">Centre</th>
+      <td headers="r2 h1 q1">420</td><td headers="r2 h1 q2">455</td>
+      <td headers="r2 h2 q3">410</td><td headers="r2 h2 q4">500</td>
+      <td headers="r2 tot">1785</td>
+    </tr>
+    <tr>
+      <th id="r3" scope="row">South</th>
+      <td headers="r3 h1 q1">180</td><td headers="r3 h1 q2">205</td>
+      <td headers="r3 h2 q3">170</td><td headers="r3 h2 q4">230</td>
+      <td headers="r3 tot">785</td>
+    </tr>
+  </tbody>
+</table>
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var KW='const|let|var|function|return|if|else|for|while|do|of|in|new|class|extends|this|true|false|null|undefined|typeof|instanceof|switch|case|break|continue|default|async|await|try|catch|finally|throw|import|export|from|static|get|set';
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokJS(code,T){
+    var re=new RegExp("(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)|('(?:\\\\.|[^'\\\\\\n])*'|\"(?:\\\\.|[^\"\\\\\\n])*\"|`(?:\\\\.|[^`\\\\])*`)|(\\b\\d+(?:\\.\\d+)?\\b)|\\b("+KW+")\\b|([A-Za-z_$][\\w$]*)(?=\\s*\\()","g");
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'num':m[4]?'kw':'fn',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokCSS(code,T){
+    var re=/(\/\*[\s\S]*?\*\/)|("[^"\n]*"|'[^'\n]*')|(--[\w-]+|[a-z-]+)(?=\s*:[^;{}]*[;}])|(@[\w-]+)|(#[0-9a-fA-F]{3,8}\b|-?\b\d*\.?\d+(?:px|rem|em|%|vh|vw|vmin|vmax|ms|s|deg|fr|ch)?\b)|([^{};\/@]+?)(?=\s*\{)/g;
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m[0]===''){re.lastIndex++;continue;}
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'prop':m[4]?'at':m[5]?'num':'sel',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokTag(t,T){
+    var m=t.match(/^<(\/?)([!\w-]+)([\s\S]*?)(\/?>)$/);
+    if(!m){T.push(['',t]);return;}
+    T.push(['pun','<'+m[1]]);T.push(['tag',m[2]]);
+    var re=/([\w:@.-]+)(\s*=\s*)?("[^"]*"|'[^']*'|[^\s"'>]+)?|(\s+)|([\s\S])/g,a;
+    while((a=re.exec(m[3]))){
+      if(a[1]){T.push(['att',a[1]]);if(a[2])T.push(['pun',a[2]]);if(a[3])T.push(['str',a[3]]);}
+      else T.push(['',a[0]]);
+    }
+    T.push(['pun',m[4]]);
+  }
+  var CO='<'+'!'+'--',CC='--'+'>';
+  function tokHTML(code,T){
+    var i=0,j;
+    while(i<code.length){
+      if(code.startsWith(CO,i)){
+        j=code.indexOf(CC,i);j=j<0?code.length:j+3;T.push(['com',code.slice(i,j)]);i=j;
+      }else if(code[i]==='<'&&/[\/!a-zA-Z]/.test(code[i+1]||'')){
+        j=code.indexOf('>',i);j=j<0?code.length:j+1;
+        var tg=code.slice(i,j);tokTag(tg,T);i=j;
+        var om=tg.match(/^<(style|script)\b/i);
+        if(om&&!/type\s*=\s*["']text\/plain/i.test(tg)){
+          var close='</'+om[1].toLowerCase(),k=code.toLowerCase().indexOf(close,i);if(k<0)k=code.length;
+          var inner=code.slice(i,k);
+          if(om[1].toLowerCase()==='style')tokCSS(inner,T);else tokJS(inner,T);
+          i=k;
+        }
+      }else{
+        j=code.indexOf('<',i+1);if(j<0)j=code.length;
+        code.slice(i,j).split(/(&[a-zA-Z#0-9]+;)/).forEach(function(p,x){if(p)T.push([x%2?'ent':'',p]);});
+        i=j;
+      }
+    }
+  }
+  function tokens(code,lang){var T=[];(lang==='css'?tokCSS:lang==='js'?tokJS:tokHTML)(code,T);return T;}
+  function render(T,plain){
+    var lines=[[]];
+    T.forEach(function(t){
+      t[1].split('\n').forEach(function(p,i){
+        if(i>0)lines.push([]);
+        if(p)lines[lines.length-1].push(t[0]?'<span class="t-'+t[0]+'">'+esc(p)+'</span>':esc(p));
+      });
+    });
+    if(plain)return lines.map(function(l){return l.join('');}).join('\n');
+    return lines.map(function(l,n){return '<span class="ln" data-n="'+(n+1)+'">'+(l.join('')||' ')+'</span>';}).join('');
+  }
+  window.IHM={hl:function(c,l){return render(tokens(c,l));},hlPlain:function(c,l){return render(tokens(c,l),true);},esc:esc};
+
+  var SC='<'+'script>',SE='<'+'/script>';
+  var CONSOLE='<style>#__c{font:12.5px/1.6 Consolas,monospace;background:#0b1020;color:#c9d1f5;padding:10px 14px;margin-top:16px;border-radius:10px;white-space:pre-wrap}#__c div{border-bottom:1px solid #1e2748;padding:3px 0}#__c .e{color:#f87171}#__c .w{color:#fbbf24}#__c b{color:#22d3ee}</style>'+SC+
+  '(function(){var q=[],box=null;function f(x){if(typeof x==="string")return x;try{return JSON.stringify(x)}catch(e){return String(x)}}'+
+  'function add(c,a){if(!box){q.push([c,a]);return}var d=document.createElement("div");d.className=c;d.textContent="> "+[].map.call(a,f).join(" ");box.appendChild(d)}'+
+  'var L=console.log;console.log=function(){add("",arguments);L.apply(console,arguments)};console.info=console.log;console.table=console.log;'+
+  'console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'+
+  'window.addEventListener("error",function(e){add("e",["Uncaught "+e.message])});'+
+  'document.addEventListener("DOMContentLoaded",function(){box=document.createElement("div");box.id="__c";box.innerHTML="<b>Console</b>";document.body.appendChild(box);q.forEach(function(x){add(x[0],x[1])});q=[]})})()'+SE;
+  function wrapDoc(src,lang,cons){
+    var base='<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;line-height:1.6;color:#1e293b}</style>';
+    var doc;
+    if(lang==='css')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'<style>'+src+'</style></head><body></body></html>';
+    else if(lang==='js')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'</head><body>'+SC+src+SE+'</body></html>';
+    else if(/<html/i.test(src))doc=src;
+    else doc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'+base+'</head><body>'+src+'</body></html>';
+    if(cons){doc=/<head[^>]*>/i.test(doc)?doc.replace(/<head([^>]*)>/i,'<head$1>'+CONSOLE):CONSOLE+doc;}
+    return doc;
+  }
+
+  document.querySelectorAll('.code[data-src]').forEach(function(box){
+    var el=document.getElementById(box.dataset.src);
+    if(!el){box.textContent='Missing source: '+box.dataset.src;return;}
+    var orig=el.textContent.replace(/<\\\/script>/g,SE).replace(/^\n+|\s+$/g,''),src=orig;
+    var lang=box.dataset.lang||'html',run=box.hasAttribute('data-run'),cons=box.hasAttribute('data-console');
+    box.innerHTML='<div class="code-h"><span class="lbl">'+(box.dataset.label||lang)+'</span><div class="acts">'+
+      (run?'<button data-act="run">Run</button><button data-act="edit">Edit live</button>':'')+'<button data-act="copy">Copy</button></div></div><pre>'+IHM.hl(src,lang)+'</pre>'+
+      (run?'<div class="preview"><iframe title="Live preview" loading="lazy"></iframe></div>':'');
+    var pre=box.querySelector('pre');
+    box.querySelector('[data-act="copy"]').onclick=function(){
+      var done=function(){toast('Copied to clipboard');};
+      if(navigator.clipboard)navigator.clipboard.writeText(src).then(done,fallback);else fallback();
+      function fallback(){var ta=document.createElement('textarea');ta.value=src;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();done();}
+    };
+    if(!run)return;
+    var pv=box.querySelector('.preview'),fr=pv.querySelector('iframe'),bRun=box.querySelector('[data-act="run"]'),bEd=box.querySelector('[data-act="edit"]'),ta=null,tm;
+    function show(){fr.srcdoc=wrapDoc(src,lang,cons);}
+    bRun.onclick=function(){
+      var open=pv.classList.toggle('open');
+      if(open)show();
+      bRun.textContent=open?'Hide':'Run';bRun.classList.toggle('on',open);refreshSol(box);
+    };
+    bEd.onclick=function(){
+      if(!ta){
+        ta=document.createElement('textarea');ta.value=src;ta.spellcheck=false;
+        ta.style.height=Math.max(260,pre.offsetHeight)+'px';
+        pre.replaceWith(ta);bEd.textContent='Reset';bEd.classList.add('on');
+        if(!pv.classList.contains('open')){pv.classList.add('open');bRun.textContent='Hide';bRun.classList.add('on');}
+        show();
+        ta.addEventListener('input',function(){src=ta.value;clearTimeout(tm);tm=setTimeout(show,350);});
+        ta.addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDefault();var s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end');src=ta.value;}});
+        ta.focus();
+      }else{
+        src=orig;pre.innerHTML=IHM.hl(src,lang);ta.replaceWith(pre);ta=null;bEd.textContent='Edit live';bEd.classList.remove('on');show();
+      }
+      refreshSol(box);
+    };
+  });
+  function toast(t){var e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(function(){e.classList.remove('show');},1600);}
+  window.IHM.toast=toast;
+  function refreshSol(el){var s=el.closest('.sol');if(s&&s.classList.contains('on'))setTimeout(function(){s.style.maxHeight=s.scrollHeight+600+'px';},40);}
+  window.IHM.refreshSol=refreshSol;
+  document.querySelectorAll('[data-sol]').forEach(function(btn){
+    var sol=btn.nextElementSibling;
+    btn.onclick=function(){
+      var on=sol.classList.toggle('on');
+      sol.style.maxHeight=on?sol.scrollHeight+600+'px':'0';
+      btn.textContent=on?'Hide solution':'Show solution';
+    };
+  });
+
+  var TL=["<table>", "  <caption>Income statement 2025<\/caption>", "  <thead>", "    <tr>", "      <th scope=\"col\">Item<\/th>", "      <th scope=\"col\">Amount<\/th>", "    <\/tr>", "  <\/thead>", "  <tbody>", "    <tr><th scope=\"row\">Revenue<\/th>", "        <td>1 250 000<\/td><\/tr>", "  <\/tbody>", "<\/table>"],TLANG='html',full=TL.join('\n'),k=0,tp=document.getElementById('typed');
+  (function type(){
+    if(!tp)return;
+    if(k<=full.length){tp.innerHTML=IHM.hlPlain(full.slice(0,k),TLANG)+'<span class="caret"></span>';k++;setTimeout(type,full[k-1]==='\n'?170:26);}
+    else setTimeout(function(){k=0;type();},4200);
+  })();
+  var term=document.getElementById('term');
+  if(term){
+    term.addEventListener('mousemove',function(e){var r=term.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;term.style.transform='perspective(900px) rotateY('+(x*14)+'deg) rotateX('+(-y*14)+'deg)';});
+    term.addEventListener('mouseleave',function(){term.style.transform='';});
+  }
+  var glow=document.getElementById('glow');
+  window.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+  document.querySelectorAll('.rv,[data-io]').forEach(function(el){io.observe(el);});
+
+  var secs=[].slice.call(document.querySelectorAll('section[id]')),nav=document.getElementById('sidenav');
+  secs.forEach(function(s){var a=document.createElement('a');a.href='#'+s.id;a.innerHTML='<span>'+(s.dataset.title||s.id)+'</span>';nav.appendChild(a);});
+  var links=nav.querySelectorAll('a'),last=0,bar=document.getElementById('topbar'),top=document.getElementById('toTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,y=h.scrollTop;
+    document.getElementById('progress').style.width=(y/Math.max(1,h.scrollHeight-h.clientHeight)*100)+'%';
+    bar.classList.toggle('hide',y>last&&y>200);last=y;top.classList.toggle('show',y>600);
+    var cur=0;secs.forEach(function(s,i){if(s.offsetTop-window.innerHeight/2<=y)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur);});
+  },{passive:true});
+  top.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+  var tb=document.getElementById('themeBtn');
+  tb.onclick=function(){var r=document.documentElement,l=r.getAttribute('data-theme')==='light';r.setAttribute('data-theme',l?'dark':'light');tb.textContent=l?'Light mode':'Dark mode';};
+
+  var Q=[{"q": "Which list best represents a glossary of accounting terms?", "o": ["ul", "ol", "dl", "menu"], "a": 2}, {"q": "A cell with <code>colspan=\"3\"<\/code>:", "o": ["Spans three rows", "Spans three columns", "Repeats three times", "Is three times taller"], "a": 1}, {"q": "Which attribute tells a screen reader that a <code>th<\/code> heads its row?", "o": ["headers=\"row\"", "scope=\"row\"", "role=\"row\"", "axis=\"row\""], "a": 1}, {"q": "Where should column totals be placed semantically?", "o": ["In thead", "In a caption", "In tfoot", "In a separate table"], "a": 2}, {"q": "Using a table purely to position page elements is:", "o": ["Recommended for alignment", "Acceptable with role=\"presentation\", but CSS is the correct tool", "Required in HTML5", "Necessary for responsiveness"], "a": 1}],qb=document.getElementById('quizBox');
+  if(qb){
+    var score=0,done=0,res=document.createElement('div');res.className='score gtxt';
+    Q.forEach(function(it,qi){
+      var d=document.createElement('div');d.className='q';
+      d.innerHTML='<p>'+(qi+1)+'. '+it.q+'</p><div class="opts"></div>';
+      var o=d.querySelector('.opts');
+      it.o.forEach(function(t,oi){
+        var b=document.createElement('button');b.className='opt';b.innerHTML=t;
+        b.onclick=function(){
+          if(d.dataset.done)return;d.dataset.done=1;done++;
+          if(oi===it.a){b.classList.add('right');score++;}else{b.classList.add('wrong');o.children[it.a].classList.add('right');}
+          if(done===Q.length)res.textContent='Your score: '+score+' / '+Q.length+(score===Q.length?' - Excellent.':score>=3?' - Good; review the items you missed.':' - Please revisit the lesson before the next session.');
+        };
+        o.appendChild(b);
+      });
+      qb.appendChild(d);
+    });
+    qb.appendChild(res);
+  }
+})();
+</script>
+<script>
+(function(){
+'use strict';
+var R=4,C=4,st={r:0,c:0,rs:2,cs:2};
+function clamp(){st.rs=Math.min(st.rs,R-st.r);st.cs=Math.min(st.cs,C-st.c);}
+function draw(){
+  clamp();
+  ['r','c','rs','cs'].forEach(function(k){var e=document.getElementById('sp_'+k);e.value=st[k];document.getElementById('sv_'+k).textContent=k==='r'||k==='c'?st[k]+1:st[k];});
+  document.getElementById('sp_rs').max=R-st.r;document.getElementById('sp_cs').max=C-st.c;
+  var html='<table>\n',vis='';
+  for(var r=0;r<R;r++){
+    html+='  <tr>\n';vis+='<tr>';
+    for(var c=0;c<C;c++){
+      var inM=r>=st.r&&r<st.r+st.rs&&c>=st.c&&c<st.c+st.cs;
+      if(inM&&!(r===st.r&&c===st.c))continue;
+      if(r===st.r&&c===st.c){
+        var at=(st.cs>1?' colspan="'+st.cs+'"':'')+(st.rs>1?' rowspan="'+st.rs+'"':'');
+        html+='    <td'+at+'>'+String.fromCharCode(65+c)+(r+1)+'</td>\n';
+        vis+='<td class="m"'+at+'>'+String.fromCharCode(65+c)+(r+1)+(at?'<br><small>'+st.cs+' x '+st.rs+'</small>':'')+'</td>';
+      }else{html+='    <td>'+String.fromCharCode(65+c)+(r+1)+'</td>\n';vis+='<td>'+String.fromCharCode(65+c)+(r+1)+'</td>';}
+    }
+    html+='  </tr>\n';vis+='</tr>';
+  }
+  html+='</table>';
+  document.getElementById('spanVis').innerHTML=vis;
+  document.getElementById('spanCode').innerHTML=IHM.hl(html,'html');
+  var removed=st.rs*st.cs-1;
+  document.getElementById('spanNote').innerHTML=removed?'The merged cell covers '+(removed+1)+' grid slots, so exactly <strong>'+removed+'</strong> <code class="i">td</code> element'+(removed>1?'s were':' was')+' removed from the markup. Each row still accounts for '+C+' columns.':'No merging: every row contains '+C+' cells.';
+}
+['r','c','rs','cs'].forEach(function(k){document.getElementById('sp_'+k).addEventListener('input',function(e){st[k]=+e.target.value;draw();});});
+draw();
+})();
+</script>
+</body>
+</html>

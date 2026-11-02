@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Human-Machine Interface, Session 11: DOM Manipulation & Events. Dr. Gharbi Farouk, University of Tipaza.">
+<meta name="author" content="Dr. Gharbi Farouk">
+<title>IHM | Session 11 - DOM Manipulation & Events</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b18;--bg2:#0d1430;--card:rgba(255,255,255,.045);--card-b:rgba(255,255,255,.09);
+  --txt:#e6e9f5;--mut:#9aa3c2;
+  --a1:#6366f1;--a2:#22d3ee;--a3:#a855f7;--a4:#f472b6;
+  --ok:#34d399;--warn:#fbbf24;--bad:#f87171;
+  --trk:#facc15;
+  --grad:linear-gradient(120deg,var(--a1),var(--a3) 45%,var(--a2));
+  --code-bg:#0a0f22;--shadow:0 20px 60px -20px rgba(0,0,0,.6);--r:20px;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5fc;--bg2:#e7ebfa;--card:rgba(255,255,255,.78);--card-b:rgba(30,41,99,.12);
+  --txt:#141a33;--mut:#56608a;--shadow:0 20px 50px -25px rgba(40,50,120,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.75;font-size:17px;overflow-x:hidden;transition:background .6s,color .6s}
+::selection{background:var(--a3);color:#fff}
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora span{position:absolute;width:55vmax;height:55vmax;border-radius:50%;filter:blur(90px);opacity:.28;animation:float 22s ease-in-out infinite}
+.aurora span:nth-child(1){background:var(--a1);top:-20vmax;left:-15vmax}
+.aurora span:nth-child(2){background:var(--a2);bottom:-25vmax;right:-15vmax;animation-delay:-7s}
+.aurora span:nth-child(3){background:var(--trk);top:30%;left:35%;width:30vmax;height:30vmax;opacity:.16;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6vw,-5vh) scale(1.12)}66%{transform:translate(-5vw,6vh) scale(.92)}}
+.grid-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.glow{position:fixed;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:-1;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 65%);transform:translate(-50%,-50%)}
+.progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--grad);z-index:100;box-shadow:0 0 18px var(--a2)}
+.topbar{position:fixed;top:4px;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:10px 22px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(7,11,24,.55);border-bottom:1px solid var(--card-b);transition:transform .4s}
+:root[data-theme="light"] .topbar{background:rgba(243,245,252,.7)}
+.topbar.hide{transform:translateY(-120%)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff;font-weight:600;box-shadow:0 0 25px rgba(168,85,247,.5)}
+.brand small{display:block;font-weight:400;color:var(--mut);font-size:12px;line-height:1.2}
+.tbtn{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:7px 16px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:14px;transition:.3s}
+.tbtn:hover{border-color:var(--a2);box-shadow:0 0 20px rgba(34,211,238,.35)}
+.sidenav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:12px}
+.sidenav a{position:relative;width:12px;height:12px;border-radius:50%;background:var(--card-b);display:block;transition:.35s}
+.sidenav a.active{background:var(--a2);box-shadow:0 0 0 5px rgba(34,211,238,.18),0 0 16px var(--a2);transform:scale(1.25)}
+.sidenav a span{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(8px);white-space:nowrap;font-size:13px;background:var(--bg2);border:1px solid var(--card-b);padding:3px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:.3s;color:var(--txt)}
+.sidenav a:hover span{opacity:1;transform:translateY(-50%) translateX(0)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+section{padding:90px 0 30px}
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:110px}
+.hero-inner{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;width:100%}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;border:1px solid var(--card-b);background:var(--card);font-size:14px;color:var(--mut)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--trk);box-shadow:0 0 10px var(--trk);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.hero h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.12;font-weight:800;margin:20px 0 16px;letter-spacing:-.02em}
+.gtxt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.hero p.lead{color:var(--mut);font-size:1.1rem;max-width:580px}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.meta div{padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);font-size:14px}
+.meta b{display:block;color:var(--a2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{position:relative;overflow:hidden;border:none;padding:13px 28px;border-radius:14px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;color:#fff;background:var(--grad);background-size:200%;box-shadow:0 10px 30px -10px var(--a3);transition:.4s;text-decoration:none;display:inline-block}
+.btn:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 18px 40px -12px var(--a3)}
+.btn.ghost{background:transparent;border:1px solid var(--card-b);color:var(--txt);box-shadow:none}
+.btn.ghost:hover{border-color:var(--a1)}
+.term{background:var(--code-bg);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);box-shadow:var(--shadow),0 0 60px -20px var(--a1);overflow:hidden;transition:transform .2s}
+.term-h{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
+.term-h i{width:11px;height:11px;border-radius:50%;background:#ff5f57}
+.term-h i:nth-child(2){background:#febc2e}.term-h i:nth-child(3){background:#28c840}
+.term-h span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5b6591}
+.term pre{padding:20px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#c9d1f5;min-height:300px;white-space:pre-wrap}
+.caret{display:inline-block;width:8px;height:17px;background:var(--a2);vertical-align:middle;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sec-h{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.num{flex:none;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:20px;color:#fff;background:var(--grad);box-shadow:0 10px 30px -10px var(--a1)}
+.sec-h h2{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.25;letter-spacing:-.01em}
+.sec-h small{display:block;color:var(--mut);font-size:13px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+h3{font-size:1.22rem;margin:26px 0 10px;color:var(--a2)}
+h4{margin:16px 0 6px}
+p{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);padding:26px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);margin-bottom:20px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(140deg,rgba(99,102,241,.5),transparent 40%,transparent 60%,rgba(34,211,238,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.card>h3:first-child{margin-top:0}
+code.i{font-family:'JetBrains Mono',monospace;font-size:.84em;background:rgba(99,102,241,.16);color:#a5b4fc;padding:1px 7px;border-radius:6px;white-space:nowrap}
+:root[data-theme="light"] code.i{color:#4338ca}
+ul.list{list-style:none;margin:8px 0 14px}
+ul.list li{position:relative;padding-left:26px;margin-bottom:6px}
+ul.list li::before{content:"";position:absolute;left:4px;top:11px;width:9px;height:9px;border-radius:3px;background:var(--grad);transform:rotate(45deg)}
+ol.steps{margin:8px 0 14px 22px}
+ol.steps li{margin-bottom:6px;padding-left:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.note{border-left:4px solid var(--a2);background:rgba(34,211,238,.07);padding:14px 18px;border-radius:12px;margin:16px 0}
+.note.warn{border-color:var(--warn);background:rgba(251,191,36,.07)}
+.note.ok{border-color:var(--ok);background:rgba(52,211,153,.07)}
+.note.def{border-color:var(--a3);background:rgba(168,85,247,.08)}
+.note b:first-child{display:block;margin-bottom:2px}
+.obj{display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--card-b);transition:.4s}
+.obj:hover{transform:translateY(-6px);border-color:var(--a3);box-shadow:0 20px 40px -20px var(--a3)}
+.obj .n{flex:none;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--a2);font-size:22px;line-height:1.3}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.track{border-radius:var(--r);padding:20px;background:var(--card);border:1px solid var(--card-b)}
+.track h4{font-family:'JetBrains Mono',monospace;font-size:18px;margin:0 0 12px}
+.track.html h4{color:#fb923c}.track.css h4{color:#38bdf8}.track.js h4{color:#facc15}
+.step{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;border:1px solid transparent;transition:.3s;text-decoration:none;color:inherit}
+.step b{font-family:'JetBrains Mono',monospace;font-size:12px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.07)}
+.step.done{opacity:.62}.step.done b{background:var(--ok);color:#052e1f}
+.step.now{border-color:var(--a2);background:rgba(34,211,238,.09);box-shadow:0 0 25px -8px var(--a2)}
+.step.now b{background:var(--a2);color:#062029}
+.step:hover{background:rgba(255,255,255,.05)}
+.code{margin:16px 0;border-radius:16px;overflow:hidden;background:var(--code-bg);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow)}
+.code-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
+.code-h .lbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b93b8;display:flex;gap:8px;align-items:center}
+.code-h .lbl::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--dot,#fb923c);box-shadow:0 0 8px var(--dot,#fb923c)}
+.code[data-lang="css"]{--dot:#38bdf8}.code[data-lang="js"]{--dot:#facc15}
+.code-h .acts{display:flex;gap:6px}
+.code-h button{font-family:inherit;font-size:12px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#c9d1f5;padding:3px 12px;border-radius:8px;cursor:pointer;transition:.25s}
+.code-h button:hover,.code-h button.on{background:var(--a1);border-color:var(--a1)}
+.code pre{padding:18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;color:#d5dbf5}
+.code pre .ln{display:block;padding-left:42px;position:relative;white-space:pre}
+.code pre .ln::before{content:attr(data-n);position:absolute;left:0;width:28px;text-align:right;color:#3d4670;font-size:12px}
+.code textarea{display:block;width:100%;min-height:260px;padding:18px;border:0;outline:0;resize:vertical;background:#070b1a;color:#e6e9f5;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;tab-size:2;white-space:pre}
+.t-tag{color:#f472b6}.t-att{color:#7dd3fc}.t-str{color:#a3e635}.t-com{color:#5b6591;font-style:italic}.t-ent{color:#fbbf24}.t-pun{color:#8b93b8}
+.t-kw{color:#c084fc}.t-num{color:#fb923c}.t-fn{color:#38bdf8}.t-sel{color:#f9a8d4}.t-prop{color:#7dd3fc}.t-at{color:#c084fc}
+.preview{display:none;border-top:1px solid rgba(255,255,255,.08);background:#fff}
+.preview.open{display:block;animation:drop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes drop{from{opacity:0;transform:translateY(-10px)}}
+.preview iframe{width:100%;height:360px;border:0;display:block;background:#fff}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;font-size:15px;border-radius:14px;overflow:hidden;border:1px solid var(--card-b)}
+.tbl th{background:linear-gradient(120deg,rgba(99,102,241,.35),rgba(168,85,247,.25));padding:11px;text-align:left}
+.tbl td{padding:10px 11px;border-top:1px solid var(--card-b);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.035)}
+.tblw{overflow-x:auto}
+.ex{border-radius:var(--r);background:var(--card);border:1px solid var(--card-b);margin-bottom:22px;overflow:hidden;box-shadow:var(--shadow)}
+.ex-h{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(120deg,rgba(99,102,241,.14),transparent)}
+.ex-h .tag{font-family:'JetBrains Mono',monospace;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--grad);color:#fff;font-size:14px;white-space:nowrap}
+.ex-h h3{margin:0;color:var(--txt);font-size:1.12rem}
+.lvl-b{margin-left:auto;font-size:12px;padding:3px 12px;border-radius:999px;border:1px solid;white-space:nowrap}
+.lvl-b.m{color:var(--warn);border-color:var(--warn)}.lvl-b.a{color:var(--bad);border-color:var(--bad)}.lvl-b.e{color:var(--ok);border-color:var(--ok)}
+.ex-b{padding:6px 24px 22px}
+.sol-btn{margin-top:10px}
+.sol{max-height:0;overflow:hidden;transition:max-height .8s cubic-bezier(.2,.8,.2,1)}
+.sol-in{padding-top:14px}
+.hw{position:relative;border-radius:26px;padding:34px;background:linear-gradient(135deg,rgba(99,102,241,.22),rgba(168,85,247,.16) 50%,rgba(34,211,238,.16));border:1px solid rgba(168,85,247,.4);overflow:hidden}
+.hw::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:var(--a2);filter:blur(120px);opacity:.25;top:-100px;right:-80px;pointer-events:none}
+.hw h3{font-size:1.5rem;margin-top:0;color:var(--txt)}
+.dead{display:inline-block;margin-top:14px;padding:8px 18px;border-radius:12px;background:rgba(0,0,0,.25);font-weight:700}
+:root[data-theme="light"] .dead{background:rgba(255,255,255,.6)}
+.q{margin-bottom:18px}
+.q p{font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:11px 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:15px;text-align:left;transition:.3s}
+.opt:hover{border-color:var(--a1);transform:translateX(4px)}
+.opt.right{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.13);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+.score{font-size:1.2rem;font-weight:700;margin-top:10px}
+.refs li{margin-bottom:6px}
+.refs a{color:var(--a2)}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+/* widgets shared */
+.ctl{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut);min-width:150px;flex:1}
+.ctl select,.ctl input[type=text],.ctl input[type=number]{font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 10px;border-radius:10px;border:1px solid var(--card-b);background:var(--bg2);color:var(--txt)}
+.ctl input[type=range]{accent-color:var(--a2)}
+.stage{border-radius:14px;border:1px dashed var(--card-b);padding:14px;background:rgba(0,0,0,.18);min-height:120px}
+:root[data-theme="light"] .stage{background:rgba(255,255,255,.5)}
+.mono{font-family:'JetBrains Mono',monospace}
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(99,102,241,.18);color:#c7d2fe;margin:2px}
+:root[data-theme="light"] .pill{color:#3730a3}
+footer{margin-top:80px;padding:40px 0;border-top:1px solid var(--card-b);text-align:center;color:var(--mut);font-size:14px}
+footer b{color:var(--txt)}
+footer a{color:var(--a2);text-decoration:none}
+.toTop{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:14px;border:none;background:var(--grad);color:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;cursor:pointer;opacity:0;transform:translateY(20px);transition:.4s;z-index:80;box-shadow:0 10px 30px -10px var(--a3)}
+.toTop.show{opacity:1;transform:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,140px);background:var(--grad);color:#fff;padding:10px 24px;border-radius:12px;font-weight:700;z-index:200;transition:.4s}
+.toast.show{transform:translate(-50%,0)}
+.loop{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center}
+.loop div{padding:16px 10px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);position:relative}
+.loop div b{display:block;font-family:'JetBrains Mono',monospace;color:var(--a2);margin-bottom:4px}
+.loop div:not(:last-child)::after{content:"";position:absolute;right:-10px;top:50%;width:8px;height:8px;border-top:2px solid var(--a2);border-right:2px solid var(--a2);transform:translateY(-50%) rotate(45deg)}
+.prop{display:grid;grid-template-columns:1.1fr 1fr;gap:20px}
+.pbox{border-radius:14px;padding:14px 14px 14px;border:2px solid var(--card-b);position:relative;transition:.25s;font-family:'JetBrains Mono',monospace;font-size:12px}
+.pbox>span.lb{display:block;margin-bottom:8px;color:var(--mut)}
+.pbox.hl{border-color:var(--a2);background:rgba(34,211,238,.12);box-shadow:0 0 0 4px rgba(34,211,238,.12)}
+.pbox.hl.up{border-color:#f472b6;background:rgba(244,114,182,.12);box-shadow:0 0 0 4px rgba(244,114,182,.12)}
+.pbox.stop{border-color:var(--bad)!important;background:rgba(248,113,113,.15)!important}
+#pBtn{font-family:'JetBrains Mono',monospace;font-size:13px;padding:10px 18px;border-radius:10px;border:0;background:var(--grad);color:#fff;cursor:pointer}
+#pLog{font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--code-bg);color:#c9d1f5;border-radius:12px;padding:12px;min-height:260px;list-style:none}
+#pLog li{padding:3px 0;border-bottom:1px solid #1e2748;animation:chipIn .3s both}
+#pLog .c{color:#22d3ee}#pLog .t{color:#facc15}#pLog .b{color:#f472b6}#pLog .s{color:#f87171}
+@keyframes chipIn{from{opacity:0;transform:translateX(-10px)}}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin-top:8px}
+.legend2 i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.xss{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.xss .out{min-height:60px;border-radius:12px;padding:12px;background:var(--code-bg);color:#e6e9f5;font-size:14px;word-break:break-word}
+#xssIn{width:100%;font-family:'JetBrains Mono',monospace;padding:10px 12px;border-radius:10px;border:1px solid var(--card-b);background:var(--bg2);color:var(--txt)}
+@media (max-width:900px){.prop,.xss,.loop{grid-template-columns:1fr}.loop div::after{display:none}}
+@media (max-width:900px){
+  .hero-inner,.grid2,.road{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .sidenav{display:none}
+  .term{display:none}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .grid3,.opts{grid-template-columns:1fr}
+  .brand small{display:none}
+  .card,.hw{padding:20px}
+  .ex-h{flex-wrap:wrap;padding:16px}
+  .lvl-b{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="grid-bg"></div>
+<div class="glow" id="glow"></div>
+<div class="progress" id="progress"></div>
+
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <div class="logo">IHM</div>
+    <div>Human-Machine Interface<small>Business Computing &middot; Year 1 &middot; Session 11</small></div>
+  </div>
+  <button class="tbtn" id="themeBtn">Light mode</button>
+</header>
+<nav class="sidenav" id="sidenav" aria-label="Section navigation"></nav>
+
+<section class="hero" id="home" data-title="Overview">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="chip rv"><i></i> Session 11 of 12 &middot; JavaScript Track</span>
+      <h1 class="rv d1">DOM Manipulation<br>&amp; <span class="gtxt">Event Handling</span></h1>
+      <p class="lead rv d2">The Document Object Model is the programming interface through which JavaScript reads and modifies the page; events are the mechanism through which the user's actions reach the program. Together they close the interaction loop of a human-machine interface: perceive, act, respond.</p>
+      <div class="meta rv d3">
+        <div><b>Institution</b>University of Tipaza</div>
+        <div><b>Faculty</b>Economics, Commerce &amp; Management Sciences</div>
+        <div><b>Lecturer</b>Dr. Gharbi Farouk</div>
+        <div><b>Duration</b>90 minutes</div>
+      </div>
+      <div class="cta rv d3">
+        <a class="btn" href="#s1">Start the lecture</a>
+        <a class="btn ghost" href="#exercises">Practical exercises</a>
+      </div>
+    </div>
+    <div class="term rv d2" id="term">
+      <div class="term-h"><i></i><i></i><i></i><span>app.js</span></div>
+      <pre id="typed"></pre>
+    </div>
+  </div>
+</section>
+<section id="goals" data-title="Learning outcomes"><div class="wrap">
+  <div class="sec-h rv"><div class="num">00</div><h2>Learning Outcomes<small>By the end of this session, students will be able to</small></h2></div>
+  <div class="grid2"><div class="obj rv d0"><div class="n">01</div><div>Select and traverse elements of the DOM with <code class="i">querySelector</code>, <code class="i">querySelectorAll</code> and the navigation properties.</div></div><div class="obj rv d1"><div class="n">02</div><div>Read and modify content, attributes, classes and form values, distinguishing <code class="i">textContent</code> from <code class="i">innerHTML</code> for security.</div></div><div class="obj rv d2"><div class="n">03</div><div>Create, insert and remove elements to render data-driven views.</div></div><div class="obj rv d3"><div class="n">04</div><div>Handle events, explain the capture and bubbling phases, and apply event delegation in accessible interactive components.</div></div></div>
+  <h3 class="rv" style="margin-top:40px">Course roadmap: 12 sessions</h3>
+  <div class="road"><div class="track html rv"><h4>HTML</h4><a class="step done" href="IHM_S01_HTML_Semantic_Structure.html"><b>01</b>Semantic Document Structure</a><a class="step done" href="IHM_S02_HTML_Links_Multimedia.html"><b>02</b>Hyperlinks &amp; Multimedia</a><a class="step done" href="IHM_S03_HTML_Lists_Tables.html"><b>03</b>Lists &amp; Advanced Tables</a><a class="step done" href="IHM_S04_HTML_Forms_Accessibility.html"><b>04</b>Forms &amp; Accessibility</a></div><div class="track css rv"><h4>CSS</h4><a class="step done" href="IHM_S05_CSS_Selectors_Cascade_BoxModel.html"><b>05</b>Selectors, Cascade &amp; Box Model</a><a class="step done" href="IHM_S06_CSS_Flexbox_Grid.html"><b>06</b>Flexbox &amp; Grid Layout</a><a class="step done" href="IHM_S07_CSS_Responsive_Design.html"><b>07</b>Responsive Design</a><a class="step done" href="IHM_S08_CSS_Transitions_Animations.html"><b>08</b>Transitions &amp; Animations</a></div><div class="track js rv"><h4>JavaScript</h4><a class="step done" href="IHM_S09_JS_Fundamentals.html"><b>09</b>Variables, Types &amp; Control Flow</a><a class="step done" href="IHM_S10_JS_Functions_Arrays_Objects.html"><b>10</b>Functions, Arrays &amp; Objects</a><a class="step now" href="IHM_S11_JS_DOM_Events.html"><b>11</b>DOM Manipulation &amp; Events</a><a class="step " href="IHM_S12_JS_Integrated_Project.html"><b>12</b>Integrated Interface Project</a></div></div>
+  <div class="note rv"><b>Recap of the previous session</b>Session 10 modelled data with functions, arrays and objects. Today that data meets the interface: we render it into the DOM and update it in response to user events.</div>
+</div></section>
+<section id="s1" data-title="The DOM"><div class="wrap"><div class="sec-h rv"><div class="num">01</div><h2>The Document Object Model<small>A tree of objects with an API</small></h2></div>
+<div class="card rv">
+<p>When the browser parses an HTML document, it builds a tree of <b>node</b> objects (Session 01) and exposes it to scripts through the global object <code class="i">document</code>. Every element node is an object with properties (<code class="i">id</code>, <code class="i">className</code>, <code class="i">textContent</code>...) and methods (<code class="i">append()</code>, <code class="i">remove()</code>, <code class="i">addEventListener()</code>...). Modifying these objects modifies the page immediately.</p>
+<div class="loop">
+<div><b>1. Select</b>Locate the element(s) concerned</div>
+<div><b>2. Listen</b>Attach a handler to an event</div>
+<div><b>3. Compute</b>Update the data (state)</div>
+<div><b>4. Render</b>Reflect the state in the DOM</div>
+</div>
+</div>
+<div class="card rv">
+<h3>Selecting elements</h3>
+<div class="tblw"><table class="tbl">
+<tr><th>Method</th><th>Returns</th></tr>
+<tr><td><code class="i">document.getElementById("cart")</code></td><td>The element with that id, or <code class="i">null</code></td></tr>
+<tr><td><code class="i">document.querySelector(".card &gt; h3")</code></td><td>The first element matching any CSS selector (Session 05), or <code class="i">null</code></td></tr>
+<tr><td><code class="i">document.querySelectorAll("li.item")</code></td><td>A static <code class="i">NodeList</code> of all matches, iterable with <code class="i">for...of</code> or <code class="i">forEach</code></td></tr>
+<tr><td><code class="i">element.closest(".card")</code></td><td>The nearest ancestor (or itself) matching the selector</td></tr>
+</table></div>
+<p><b>Traversal</b>: <code class="i">parentElement</code>, <code class="i">children</code>, <code class="i">firstElementChild</code>, <code class="i">nextElementSibling</code> and <code class="i">previousElementSibling</code> navigate between element nodes. Selections can also be scoped: <code class="i">card.querySelector(".price")</code> searches only within <code class="i">card</code>.</p>
+</div>
+<div class="code" data-src="c-select" data-label="selecting.html" data-lang="html" data-run data-console></div>
+</div></section>
+
+<section id="s2" data-title="Modifying"><div class="wrap"><div class="sec-h rv"><div class="num">02</div><h2>Reading and Modifying Elements<small>Content, attributes, classes and form values</small></h2></div>
+<div class="card rv">
+<div class="tblw"><table class="tbl">
+<tr><th>Aspect</th><th>API</th><th>Notes</th></tr>
+<tr><td>Text</td><td><code class="i">el.textContent = "..."</code></td><td>Safe: the string is inserted as text</td></tr>
+<tr><td>Markup</td><td><code class="i">el.innerHTML = "&lt;b&gt;...&lt;/b&gt;"</code></td><td>Parses HTML; never use with untrusted data</td></tr>
+<tr><td>Attributes</td><td><code class="i">getAttribute</code>, <code class="i">setAttribute</code>, <code class="i">removeAttribute</code>, <code class="i">toggleAttribute</code></td><td>Also direct properties: <code class="i">img.src</code>, <code class="i">a.href</code>, <code class="i">input.disabled</code></td></tr>
+<tr><td>Custom data</td><td><code class="i">el.dataset.price</code></td><td>Reads <code class="i">data-price</code>; values are strings</td></tr>
+<tr><td>Classes</td><td><code class="i">classList.add / remove / toggle / contains</code></td><td>The preferred way to change appearance: style lives in CSS</td></tr>
+<tr><td>Inline style</td><td><code class="i">el.style.setProperty("--progress", "40%")</code></td><td>For computed values, ideally through custom properties</td></tr>
+<tr><td>Form values</td><td><code class="i">input.value</code>, <code class="i">valueAsNumber</code>, <code class="i">checked</code>, <code class="i">form.elements</code></td><td><code class="i">value</code> is always a string</td></tr>
+</table></div>
+</div>
+<div class="card rv">
+<h3>Security: textContent versus innerHTML</h3>
+<p>Type text containing markup, then a malicious payload such as <code class="i">&lt;img src=x onerror="alert(1)"&gt;</code>. Inserting untrusted input with <code class="i">innerHTML</code> enables <b>Cross-Site Scripting (XSS)</b>, one of the most common Web vulnerabilities: the attacker's code runs with the victim's privileges.</p>
+<input id="xssIn" value="&lt;b&gt;Bold&lt;/b&gt; offer &lt;img src=x onerror=&quot;alert(1)&quot;&gt;" aria-label="Text to insert">
+<div class="xss" style="margin-top:12px"><div><h4>textContent</h4><div class="out" id="xssText"></div></div><div><h4>innerHTML</h4><div class="out" id="xssHtml"></div></div></div>
+<p id="xssWarn" style="margin-top:10px"></p>
+</div>
+<div class="code" data-src="c-modify" data-label="modifying.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s3" data-title="Creating elements"><div class="wrap"><div class="sec-h rv"><div class="num">03</div><h2>Creating and Removing Elements<small>From data to view</small></h2></div>
+<div class="card rv">
+<p>Dynamic interfaces <b>render</b> data: for each object in an array, an element is created and inserted. The essential methods are <code class="i">document.createElement(tag)</code>, then <code class="i">parent.append(...)</code> / <code class="i">prepend(...)</code>, <code class="i">el.before(...)</code> / <code class="i">after(...)</code>, <code class="i">el.replaceWith(...)</code> and <code class="i">el.remove()</code>.</p>
+<ul class="list">
+<li>Inserting many elements one by one causes repeated work; build them in a <code class="i">DocumentFragment</code> and insert it once.</li>
+<li>The <code class="i">&lt;template&gt;</code> element holds inert markup that is cloned with <code class="i">template.content.cloneNode(true)</code>, keeping structure in HTML rather than in strings.</li>
+<li>A robust architecture keeps a single source of truth (the data array) and a <code class="i">render()</code> function that rebuilds the view from it after every change.</li>
+</ul>
+</div>
+<div class="code" data-src="c-render" data-label="render-from-data.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s4" data-title="Events"><div class="wrap"><div class="sec-h rv"><div class="num">04</div><h2>Events<small>addEventListener and the event object</small></h2></div>
+<div class="card rv">
+<p>An <b>event</b> is a notification that something has happened: a click, a key press, a change of value, a form submission, the end of page loading. A <b>listener</b> is registered with <code class="i">target.addEventListener(type, handler, options)</code>; when the event occurs, the handler receives an <b>event object</b> describing it.</p>
+<div class="tblw"><table class="tbl">
+<tr><th>Category</th><th>Event types</th></tr>
+<tr><td>Pointer and mouse</td><td><code class="i">click</code>, <code class="i">dblclick</code>, <code class="i">pointerdown</code>, <code class="i">pointermove</code>, <code class="i">mouseenter</code>, <code class="i">contextmenu</code></td></tr>
+<tr><td>Keyboard</td><td><code class="i">keydown</code>, <code class="i">keyup</code> (with <code class="i">event.key</code>)</td></tr>
+<tr><td>Forms</td><td><code class="i">input</code> (every change), <code class="i">change</code> (committed change), <code class="i">submit</code>, <code class="i">invalid</code>, <code class="i">reset</code></td></tr>
+<tr><td>Focus</td><td><code class="i">focus</code>, <code class="i">blur</code>, <code class="i">focusin</code>, <code class="i">focusout</code></td></tr>
+<tr><td>Document and window</td><td><code class="i">DOMContentLoaded</code>, <code class="i">load</code>, <code class="i">resize</code>, <code class="i">scroll</code></td></tr>
+</table></div>
+<p>Key properties of the event object: <code class="i">type</code>; <code class="i">target</code> (the element where the event originated); <code class="i">currentTarget</code> (the element whose listener is running); <code class="i">key</code>; and the methods <code class="i">preventDefault()</code>, which cancels the browser's default action (following a link, submitting a form), and <code class="i">stopPropagation()</code>.</p>
+<div class="note warn"><b>Avoid inline handlers</b>Attributes such as <code class="i">onclick="..."</code> mix behaviour into markup, allow only one handler per event, and are blocked by strict Content Security Policies. Always use <code class="i">addEventListener</code>.</div>
+</div>
+<div class="code" data-src="c-events" data-label="events.html" data-lang="html" data-run data-console></div>
+</div></section>
+
+<section id="s5" data-title="Propagation"><div class="wrap"><div class="sec-h rv"><div class="num">05</div><h2>Propagation and Delegation<small>Capture, target and bubbling phases</small></h2></div>
+<div class="card rv">
+<p>An event dispatched on an element does not concern it alone. It travels through the tree in three phases: the <b>capture phase</b>, from <code class="i">window</code> down to the parent of the target; the <b>target phase</b>; and the <b>bubbling phase</b>, from the target back up to <code class="i">window</code>. Listeners run during bubbling by default, and during capture if registered with <code class="i">{ capture: true }</code>.</p>
+<h3>Propagation visualiser</h3>
+<div class="ctl">
+<label style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="pCap"> Also register capture listeners</label>
+<label>Call stopPropagation()<select id="pStop"><option value="">nowhere</option><option value="pArtb">article (bubbling)</option><option value="pSecb">section (bubbling)</option><option value="pSecc">section (capture)</option></select></label>
+</div>
+<div class="prop">
+<div class="pbox" id="pDoc"><span class="lb">document</span>
+<div class="pbox" id="pSec"><span class="lb">section.catalogue</span>
+<div class="pbox" id="pArt"><span class="lb">article.product</span>
+<div class="pbox" id="pBtnBox" style="text-align:center"><button id="pBtn" type="button">click: Add to cart</button></div>
+</div></div></div>
+<div><ol id="pLog"></ol>
+<div class="legend2"><span><i style="background:#22d3ee"></i>capture</span><span><i style="background:#facc15"></i>target</span><span><i style="background:#f472b6"></i>bubbling</span><span><i style="background:#f87171"></i>stopped</span></div></div>
+</div>
+</div>
+<div class="card rv">
+<h3>Event delegation</h3>
+<p>Bubbling enables a powerful pattern: rather than attaching a listener to each of a hundred buttons (including those created later), attach <b>one</b> listener to their common ancestor and determine the actual target with <code class="i">event.target.closest(selector)</code>. Delegation reduces memory use and automatically covers elements added dynamically.</p>
+</div>
+<div class="code" data-src="c-deleg" data-label="delegation.html" data-lang="html" data-run data-console></div>
+</div></section>
+
+<section id="s6" data-title="Accessibility"><div class="wrap"><div class="sec-h rv"><div class="num">06</div><h2>Accessible Dynamic Interfaces<small>Forms, focus, live regions and persistence</small></h2></div>
+<div class="card rv">
+<ul class="list">
+<li><b>Use native controls</b>: a <code class="i">button</code> is focusable and activates with <kbd>Enter</kbd> and <kbd>Space</kbd> without any extra code; a clickable <code class="i">div</code> is not.</li>
+<li><b>Reflect state in ARIA</b>: a toggle button updates <code class="i">aria-pressed</code>; a disclosure button updates <code class="i">aria-expanded</code>.</li>
+<li><b>Announce changes</b>: messages inserted into an element with <code class="i">aria-live="polite"</code> (or <code class="i">role="status"</code>) are read by screen readers without moving the focus.</li>
+<li><b>Manage focus</b>: after deleting an item or opening a dialog, move the focus deliberately with <code class="i">el.focus()</code>.</li>
+<li><b>Validate helpfully</b>: combine native constraints (Session 04) with <code class="i">setCustomValidity()</code>, <code class="i">aria-invalid</code> and messages linked through <code class="i">aria-describedby</code>.</li>
+<li><b>Persist preferences</b>: <code class="i">localStorage.setItem(key, JSON.stringify(value))</code> keeps a theme or a cart between visits (wrapped in <code class="i">try...catch</code>, since storage may be unavailable).</li>
+</ul>
+</div>
+<div class="code" data-src="c-a11y" data-label="toggle-and-live-region.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="exercises" data-title="Exercises"><div class="wrap"><div class="sec-h rv"><div class="num">07</div><h2>Practical Exercises<small>Select, listen, render</small></h2></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 01</span><h3>Theme toggle and character counter</h3><span class="lvl-b e">Foundational</span></div><div class="ex-b">
+<p>On a feedback page: (a) a button toggles a <code class="i">dark</code> class on <code class="i">body</code>, updates its <code class="i">aria-pressed</code> state and its label, and remembers the choice in <code class="i">localStorage</code>; (b) a <code class="i">textarea</code> limited to 200 characters displays "<i>n</i> characters remaining", turning red below 20.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol1" data-label="solution-01.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 02</span><h3>Filterable product catalogue</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Render an array of eight products as cards. Above the list, a search field (filtering by name as the user types, case-insensitively), a category select and a "In stock only" checkbox combine their criteria. Display the number of results in a live region, and an explicit message when no product matches.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol2" data-label="solution-02.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 03</span><h3>Task manager with delegation and persistence</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Build a task list for a project team: a form adds a task (preventing the page reload); each task has a checkbox to mark it done and a delete button. Use a <b>single</b> delegated listener on the list for both actions, keep the tasks in an array as the single source of truth, re-render after each change, and persist the array in <code class="i">localStorage</code>.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol3" data-label="solution-03.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 04</span><h3>Live loan calculator with validation</h3><span class="lvl-b a">Advanced</span></div><div class="ex-b">
+<p>Create a form (amount, annual rate, duration in months) that displays the monthly instalment and the total cost <b>as the user types</b>, formatted in DZD. Validate each field (amount 50 000 to 5 000 000; rate 0 to 20; duration 6 to 120): on an invalid field, set <code class="i">aria-invalid</code>, show a message linked by <code class="i">aria-describedby</code>, and suspend the result. On submission, prevent the default action, focus the first invalid field if any, and otherwise announce a confirmation in a live region.</p>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol4" data-label="solution-04.html" data-lang="html" data-run></div></div></div>
+</div></div>
+</div></section>
+
+<section id="quiz" data-title="Quick quiz"><div class="wrap"><div class="sec-h rv"><div class="num">08</div><h2>Check Your Understanding<small>Formative assessment</small></h2></div><div class="card rv" id="quizBox"></div></div></section>
+
+<section id="homework" data-title="Homework"><div class="wrap"><div class="sec-h rv"><div class="num">09</div><h2>Homework Assignment<small>Individual work, to be submitted</small></h2></div>
+<div class="hw rv">
+<h3>An interactive shopping interface</h3>
+<p>Produce <code class="i">lastname_firstname_TP11.zip</code> (HTML, CSS and a <code class="i">defer</code>-loaded script, no library) implementing a small shop interface:</p>
+<ul class="list">
+<li>A catalogue rendered from an array of at least ten product objects, with search, category filter and sorting by price (ascending and descending).</li>
+<li>"Add to cart" buttons handled by event delegation; a cart panel listing lines, quantities (with + and &minus; buttons), line totals, VAT and grand total.</li>
+<li>A cart badge in the header updated on every change, with the count announced in a live region.</li>
+<li>Cart persistence in <code class="i">localStorage</code> and restoration on load.</li>
+<li>Complete keyboard operability, visible focus, and no use of <code class="i">innerHTML</code> with product data (use <code class="i">textContent</code> or templates).</li>
+</ul>
+<p><b>Assessment criteria:</b> correctness of state and rendering 30% &middot; event handling and delegation 25% &middot; accessibility 20% &middot; security and code structure 25%.</p>
+<span class="dead">Deadline: beginning of Session 12</span>
+</div>
+</div></section>
+<section id="refs" data-title="Further reading"><div class="wrap"><div class="sec-h rv"><div class="num">10</div><h2>References &amp; Further Reading<small>Primary specifications and reference documentation</small></h2></div><div class="card rv"><ol class="steps refs"><li>WHATWG. <i>DOM Living Standard</i>, sections 2 (Events) and 4 (Nodes). <a href="https://dom.spec.whatwg.org/" target="_blank" rel="noopener noreferrer">dom.spec.whatwg.org</a></li><li>MDN. <i>Introduction to the DOM</i> and <i>Event bubbling</i>. <a href="https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model" target="_blank" rel="noopener noreferrer">developer.mozilla.org</a></li><li>OWASP. <i>Cross Site Scripting Prevention Cheat Sheet</i>. <a href="https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html" target="_blank" rel="noopener noreferrer">cheatsheetseries.owasp.org</a></li><li>W3C WAI. <i>ARIA Authoring Practices Guide</i>. <a href="https://www.w3.org/WAI/ARIA/apg/" target="_blank" rel="noopener noreferrer">w3.org/WAI/ARIA/apg</a></li></ol></div></div></section><footer><div class="wrap">
+  <p><b>Dr. Gharbi Farouk</b> &middot; Human-Machine Interface (IHM)</p>
+  <p>Faculty of Economics, Commerce &amp; Management Sciences &middot; University of Tipaza &middot; Academic year 2026/2027</p>
+  <p style="margin-top:8px">Previous: <a href="IHM_S10_JS_Functions_Arrays_Objects.html">Functions, Arrays &amp; Objects</a> &middot; Next: <a href="IHM_S12_JS_Integrated_Project.html">Integrated Interface Project</a></p>
+</div></footer>
+
+<button class="toTop" id="toTop" aria-label="Back to top">TOP</button>
+<div class="toast" id="toast">Copied to clipboard</div>
+
+
+<script type="text/plain" id="c-select">
+<section class="catalogue">
+  <h2 id="title">Catalogue</h2>
+  <article class="card" data-price="95000"><h3>Laptop</h3><p class="price">95 000 DZD</p></article>
+  <article class="card" data-price="24000"><h3>Printer</h3><p class="price">24 000 DZD</p></article>
+  <article class="card" data-price="38000"><h3>Monitor</h3><p class="price">38 000 DZD</p></article>
+</section>
+<script>
+  const title = document.getElementById("title");
+  console.log(title.textContent);
+
+  const firstCard = document.querySelector(".card");
+  console.log(firstCard.querySelector("h3").textContent);
+
+  const cards = document.querySelectorAll(".card");
+  console.log("Number of cards:", cards.length);
+  cards.forEach(card => console.log(card.dataset.price));
+
+  const price = document.querySelector(".card:last-child .price");
+  console.log(price.closest(".card").querySelector("h3").textContent);
+  console.log(firstCard.nextElementSibling.querySelector("h3").textContent);
+<\/script>
+</script>
+<script type="text/plain" id="c-modify">
+<style>
+  .card { padding: 14px; border-radius: 12px; border: 1px solid #cbd5e1; font-family: system-ui; max-width: 320px; }
+  .card.promo { border-color: #e11d48; background: #fff1f2; }
+  .bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #6366f1 var(--progress, 0%), #e2e8f0 0); }
+</style>
+<article class="card" id="p1" data-stock="12">
+  <h3>Printer</h3>
+  <p class="price">24 000 DZD</p>
+  <img alt="" width="0">
+  <div class="bar"></div>
+</article>
+<button id="go">Apply a 20% promotion</button>
+<script>
+  const card = document.getElementById("p1");
+  document.getElementById("go").addEventListener("click", () => {
+    card.querySelector(".price").textContent = "19 200 DZD";      // text
+    card.classList.toggle("promo");                                // class
+    card.querySelector("img").setAttribute("alt", "Promotion");   // attribute
+    card.dataset.stock = Number(card.dataset.stock) - 1;           // data-*
+    card.querySelector(".bar").style.setProperty("--progress", "65%"); // custom property
+  });
+<\/script>
+</script>
+<script type="text/plain" id="c-render">
+<style>
+  body { font-family: system-ui, sans-serif; }
+  #list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+  #list li { padding: 12px; border-radius: 10px; background: #eef2ff; }
+  #list .price { font-weight: 700; color: #4f46e5; }
+</style>
+<ul id="list"></ul>
+<template id="tpl">
+  <li><h3 class="name"></h3><p class="price"></p></li>
+</template>
+<button id="add">Add a product</button>
+<script>
+  const products = [
+    { name: "Laptop", price: 95000 },
+    { name: "Printer", price: 24000 },
+    { name: "Router", price: 12500 }
+  ];
+  const list = document.getElementById("list");
+  const tpl = document.getElementById("tpl");
+  const fmt = new Intl.NumberFormat("fr-DZ", { style: "currency", currency: "DZD" });
+
+  function render() {
+    const fragment = document.createDocumentFragment();
+    for (const p of products) {
+      const item = tpl.content.cloneNode(true);
+      item.querySelector(".name").textContent = p.name;
+      item.querySelector(".price").textContent = fmt.format(p.price);
+      fragment.append(item);
+    }
+    list.replaceChildren(fragment);       // removes old children, inserts new ones
+  }
+
+  document.getElementById("add").addEventListener("click", () => {
+    products.push({ name: "Product " + (products.length + 1), price: 5000 * products.length });
+    render();
+  });
+  render();
+<\/script>
+</script>
+<script type="text/plain" id="c-events">
+<style>
+  body { font-family: system-ui, sans-serif; }
+  #zone { padding: 16px; border: 2px dashed #94a3b8; border-radius: 12px; }
+</style>
+<form id="f">
+  <label for="q">Search</label>
+  <input id="q" name="q" autocomplete="off">
+  <button>Search</button>
+</form>
+<p><a id="lnk" href="https://example.com">A link whose navigation is cancelled</a></p>
+<div id="zone" tabindex="0">Click me, or focus me and press a key</div>
+<script>
+  const input = document.getElementById("q");
+  input.addEventListener("input", e => console.log("input:", e.target.value));
+  input.addEventListener("change", () => console.log("change (committed):", input.value));
+
+  document.getElementById("f").addEventListener("submit", e => {
+    e.preventDefault();                          // no page reload
+    console.log("submit intercepted, query =", input.value);
+  });
+
+  document.getElementById("lnk").addEventListener("click", e => {
+    e.preventDefault();
+    console.log("navigation cancelled");
+  });
+
+  const zone = document.getElementById("zone");
+  zone.addEventListener("click", e => console.log("click at", e.offsetX, e.offsetY));
+  zone.addEventListener("keydown", e => console.log("key:", e.key));
+  zone.addEventListener("mouseenter", () => console.log("mouseenter"), { once: true });
+<\/script>
+</script>
+<script type="text/plain" id="c-deleg">
+<style>
+  body { font-family: system-ui, sans-serif; }
+  .item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin: 6px 0; border-radius: 8px; background: #f1f5f9; }
+</style>
+<ul id="cart" style="padding:0;list-style:none">
+  <li class="item" data-code="P-101">Laptop <button class="remove">Remove</button></li>
+  <li class="item" data-code="P-205">Mouse <button class="remove">Remove</button></li>
+</ul>
+<button id="more">Add an item</button>
+<script>
+  const cart = document.getElementById("cart");
+
+  // ONE listener for all current and future buttons
+  cart.addEventListener("click", (event) => {
+    const button = event.target.closest(".remove");
+    if (!button) return;                         // the click was elsewhere
+    const item = button.closest(".item");
+    console.log("Removing", item.dataset.code);
+    item.remove();
+  });
+
+  let n = 300;
+  document.getElementById("more").addEventListener("click", () => {
+    const li = document.createElement("li");
+    li.className = "item";
+    li.dataset.code = "P-" + n++;
+    li.append("New item ", Object.assign(document.createElement("button"), { className: "remove", textContent: "Remove" }));
+    cart.append(li);                             // works without a new listener
+  });
+<\/script>
+</script>
+<script type="text/plain" id="c-a11y">
+<style>
+  body { font-family: system-ui, sans-serif; }
+  button[aria-pressed="true"] { background: #4f46e5; color: #fff; }
+  button { padding: 8px 14px; border-radius: 8px; border: 1px solid #4f46e5; background: #fff; cursor: pointer; }
+</style>
+<button id="fav" aria-pressed="false">Add to favourites</button>
+<p id="status" role="status" aria-live="polite"></p>
+<script>
+  const fav = document.getElementById("fav");
+  const status = document.getElementById("status");
+  fav.addEventListener("click", () => {
+    const pressed = fav.getAttribute("aria-pressed") === "true";
+    fav.setAttribute("aria-pressed", String(!pressed));
+    fav.textContent = pressed ? "Add to favourites" : "Remove from favourites";
+    status.textContent = pressed ? "Removed from favourites." : "Added to favourites.";
+  });
+<\/script>
+</script>
+<script type="text/plain" id="sol1">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 16px; transition: background .3s, color .3s; }
+  body.dark { background: #0b1020; color: #e2e8f0; }
+  textarea { width: 100%; max-width: 420px; display: block; }
+  .low { color: #dc2626; font-weight: 700; }
+</style>
+<button id="theme" aria-pressed="false">Dark mode</button>
+<p><label for="msg">Your feedback</label>
+<textarea id="msg" maxlength="200" rows="4" aria-describedby="left"></textarea></p>
+<p id="left" aria-live="polite">200 characters remaining</p>
+<script>
+  const btn = document.getElementById("theme");
+  function applyTheme(dark) {
+    document.body.classList.toggle("dark", dark);
+    btn.setAttribute("aria-pressed", String(dark));
+    btn.textContent = dark ? "Light mode" : "Dark mode";
+  }
+  let saved = false;
+  try { saved = localStorage.getItem("theme") === "dark"; } catch (e) {}
+  applyTheme(saved);
+  btn.addEventListener("click", () => {
+    const dark = !document.body.classList.contains("dark");
+    applyTheme(dark);
+    try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
+  });
+
+  const msg = document.getElementById("msg");
+  const left = document.getElementById("left");
+  msg.addEventListener("input", () => {
+    const remaining = msg.maxLength - msg.value.length;
+    left.textContent = `${remaining} characters remaining`;
+    left.classList.toggle("low", remaining < 20);
+  });
+<\/script>
+</script>
+<script type="text/plain" id="sol2">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 12px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin-bottom: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 0; list-style: none; }
+  .grid li { padding: 12px; border-radius: 10px; background: #eef2ff; }
+  .out { opacity: .55; }
+</style>
+<div class="filters">
+  <label>Search <input id="q" type="search"></label>
+  <label>Category <select id="cat"><option value="">All</option><option>IT</option><option>Furniture</option></select></label>
+  <label><input type="checkbox" id="stock"> In stock only</label>
+</div>
+<p id="count" role="status" aria-live="polite"></p>
+<ul class="grid" id="grid"></ul>
+<script>
+  const products = [
+    { name: "Laptop", category: "IT", price: 95000, stock: 4 },
+    { name: "Desk", category: "Furniture", price: 32000, stock: 0 },
+    { name: "Printer", category: "IT", price: 24000, stock: 7 },
+    { name: "Chair", category: "Furniture", price: 14500, stock: 12 },
+    { name: "Router", category: "IT", price: 12500, stock: 0 },
+    { name: "Monitor", category: "IT", price: 38000, stock: 3 },
+    { name: "Shelf", category: "Furniture", price: 9800, stock: 5 },
+    { name: "Keyboard", category: "IT", price: 7900, stock: 20 }
+  ];
+  const q = document.getElementById("q"), cat = document.getElementById("cat"),
+        stock = document.getElementById("stock"), grid = document.getElementById("grid"),
+        count = document.getElementById("count");
+
+  function render() {
+    const term = q.value.trim().toLowerCase();
+    const visible = products.filter(p =>
+      p.name.toLowerCase().includes(term) &&
+      (cat.value === "" || p.category === cat.value) &&
+      (!stock.checked || p.stock > 0));
+
+    grid.replaceChildren(...visible.map(p => {
+      const li = document.createElement("li");
+      const h = document.createElement("h3");
+      h.textContent = p.name;
+      const info = document.createElement("p");
+      info.textContent = `${p.category} - ${p.price} DZD - stock ${p.stock}`;
+      li.append(h, info);
+      if (p.stock === 0) li.classList.add("out");
+      return li;
+    }));
+    count.textContent = visible.length
+      ? `${visible.length} product(s) found`
+      : "No product matches your criteria.";
+  }
+  [q, cat, stock].forEach(el => el.addEventListener("input", render));
+  render();
+<\/script>
+</script>
+<script type="text/plain" id="sol3">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 12px; }
+  #tasks { list-style: none; padding: 0; }
+  #tasks li { display: flex; gap: 10px; align-items: center; padding: 8px 10px; margin: 6px 0; border-radius: 8px; background: #f1f5f9; }
+  #tasks li.done span { text-decoration: line-through; opacity: .6; }
+  #tasks button { margin-left: auto; }
+</style>
+<form id="form">
+  <label for="t">New task</label>
+  <input id="t" required>
+  <button>Add</button>
+</form>
+<ul id="tasks"></ul>
+<script>
+  const KEY = "ihm-tasks";
+  let tasks = [];
+  try { tasks = JSON.parse(localStorage.getItem(KEY)) ?? []; } catch (e) { tasks = []; }
+
+  const list = document.getElementById("tasks");
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(tasks)); } catch (e) {} }
+
+  function render() {
+    list.replaceChildren(...tasks.map(task => {
+      const li = document.createElement("li");
+      li.dataset.id = task.id;
+      li.classList.toggle("done", task.done);
+      const box = document.createElement("input");
+      box.type = "checkbox"; box.checked = task.done; box.className = "toggle";
+      box.setAttribute("aria-label", "Mark as done: " + task.title);
+      const span = document.createElement("span");
+      span.textContent = task.title;
+      const del = document.createElement("button");
+      del.className = "delete"; del.textContent = "Delete";
+      li.append(box, span, del);
+      return li;
+    }));
+  }
+
+  document.getElementById("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const input = document.getElementById("t");
+    tasks.push({ id: Date.now(), title: input.value.trim(), done: false });
+    input.value = "";
+    save(); render(); input.focus();
+  });
+
+  list.addEventListener("click", e => {          // single delegated listener
+    const li = e.target.closest("li");
+    if (!li) return;
+    const id = Number(li.dataset.id);
+    if (e.target.matches(".toggle")) {
+      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+    } else if (e.target.matches(".delete")) {
+      tasks = tasks.filter(t => t.id !== id);
+    } else {
+      return;
+    }
+    save(); render();
+  });
+  render();
+<\/script>
+</script>
+<script type="text/plain" id="sol4">
+<style>
+  body { font-family: system-ui, sans-serif; padding: 12px; }
+  .field { margin-bottom: 10px; }
+  .err { color: #b91c1c; font-size: .9em; min-height: 1.2em; margin: 2px 0 0; }
+  [aria-invalid="true"] { border: 2px solid #dc2626; }
+  output { display: block; font-size: 1.2rem; font-weight: 700; color: #4f46e5; margin: 12px 0; }
+</style>
+<form id="loan" novalidate>
+  <div class="field"><label for="amount">Amount (DZD)</label><br>
+    <input id="amount" type="number" value="1200000" aria-describedby="amount-err"><p class="err" id="amount-err"></p></div>
+  <div class="field"><label for="rate">Annual rate (%)</label><br>
+    <input id="rate" type="number" step="0.1" value="7" aria-describedby="rate-err"><p class="err" id="rate-err"></p></div>
+  <div class="field"><label for="months">Duration (months)</label><br>
+    <input id="months" type="number" value="60" aria-describedby="months-err"><p class="err" id="months-err"></p></div>
+  <output id="result" for="amount rate months"></output>
+  <button>Submit the application</button>
+  <p id="live" role="status" aria-live="polite"></p>
+</form>
+<script>
+  const rules = {
+    amount: { min: 50000, max: 5000000, msg: "Enter an amount between 50 000 and 5 000 000 DZD." },
+    rate:   { min: 0, max: 20, msg: "Enter a rate between 0 and 20%." },
+    months: { min: 6, max: 120, msg: "Enter a duration between 6 and 120 months." }
+  };
+  const fmt = new Intl.NumberFormat("fr-DZ", { style: "currency", currency: "DZD" });
+  const form = document.getElementById("loan");
+
+  function validate(id) {
+    const input = document.getElementById(id);
+    const v = input.valueAsNumber;
+    const ok = !Number.isNaN(v) && v >= rules[id].min && v <= rules[id].max;
+    input.setAttribute("aria-invalid", String(!ok));
+    document.getElementById(id + "-err").textContent = ok ? "" : rules[id].msg;
+    return ok;
+  }
+
+  function update() {
+    const valid = Object.keys(rules).map(validate).every(Boolean);
+    const out = document.getElementById("result");
+    if (!valid) { out.textContent = "Result suspended: please correct the highlighted fields."; return valid; }
+    const P = form.amount.valueAsNumber, n = form.months.valueAsNumber;
+    const r = form.rate.valueAsNumber / 100 / 12;
+    const M = r === 0 ? P / n : P * r / (1 - (1 + r) ** -n);
+    out.textContent = `Monthly instalment: ${fmt.format(M)} - total cost of credit: ${fmt.format(M * n - P)}`;
+    return valid;
+  }
+
+  form.addEventListener("input", update);
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    if (!update()) {
+      form.querySelector('[aria-invalid="true"]').focus();
+      return;
+    }
+    document.getElementById("live").textContent = "Your application has been recorded.";
+  });
+  update();
+<\/script>
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var KW='const|let|var|function|return|if|else|for|while|do|of|in|new|class|extends|this|true|false|null|undefined|typeof|instanceof|switch|case|break|continue|default|async|await|try|catch|finally|throw|import|export|from|static|get|set';
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokJS(code,T){
+    var re=new RegExp("(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)|('(?:\\\\.|[^'\\\\\\n])*'|\"(?:\\\\.|[^\"\\\\\\n])*\"|`(?:\\\\.|[^`\\\\])*`)|(\\b\\d+(?:\\.\\d+)?\\b)|\\b("+KW+")\\b|([A-Za-z_$][\\w$]*)(?=\\s*\\()","g");
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'num':m[4]?'kw':'fn',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokCSS(code,T){
+    var re=/(\/\*[\s\S]*?\*\/)|("[^"\n]*"|'[^'\n]*')|(--[\w-]+|[a-z-]+)(?=\s*:[^;{}]*[;}])|(@[\w-]+)|(#[0-9a-fA-F]{3,8}\b|-?\b\d*\.?\d+(?:px|rem|em|%|vh|vw|vmin|vmax|ms|s|deg|fr|ch)?\b)|([^{};\/@]+?)(?=\s*\{)/g;
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m[0]===''){re.lastIndex++;continue;}
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'prop':m[4]?'at':m[5]?'num':'sel',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokTag(t,T){
+    var m=t.match(/^<(\/?)([!\w-]+)([\s\S]*?)(\/?>)$/);
+    if(!m){T.push(['',t]);return;}
+    T.push(['pun','<'+m[1]]);T.push(['tag',m[2]]);
+    var re=/([\w:@.-]+)(\s*=\s*)?("[^"]*"|'[^']*'|[^\s"'>]+)?|(\s+)|([\s\S])/g,a;
+    while((a=re.exec(m[3]))){
+      if(a[1]){T.push(['att',a[1]]);if(a[2])T.push(['pun',a[2]]);if(a[3])T.push(['str',a[3]]);}
+      else T.push(['',a[0]]);
+    }
+    T.push(['pun',m[4]]);
+  }
+  var CO='<'+'!'+'--',CC='--'+'>';
+  function tokHTML(code,T){
+    var i=0,j;
+    while(i<code.length){
+      if(code.startsWith(CO,i)){
+        j=code.indexOf(CC,i);j=j<0?code.length:j+3;T.push(['com',code.slice(i,j)]);i=j;
+      }else if(code[i]==='<'&&/[\/!a-zA-Z]/.test(code[i+1]||'')){
+        j=code.indexOf('>',i);j=j<0?code.length:j+1;
+        var tg=code.slice(i,j);tokTag(tg,T);i=j;
+        var om=tg.match(/^<(style|script)\b/i);
+        if(om&&!/type\s*=\s*["']text\/plain/i.test(tg)){
+          var close='</'+om[1].toLowerCase(),k=code.toLowerCase().indexOf(close,i);if(k<0)k=code.length;
+          var inner=code.slice(i,k);
+          if(om[1].toLowerCase()==='style')tokCSS(inner,T);else tokJS(inner,T);
+          i=k;
+        }
+      }else{
+        j=code.indexOf('<',i+1);if(j<0)j=code.length;
+        code.slice(i,j).split(/(&[a-zA-Z#0-9]+;)/).forEach(function(p,x){if(p)T.push([x%2?'ent':'',p]);});
+        i=j;
+      }
+    }
+  }
+  function tokens(code,lang){var T=[];(lang==='css'?tokCSS:lang==='js'?tokJS:tokHTML)(code,T);return T;}
+  function render(T,plain){
+    var lines=[[]];
+    T.forEach(function(t){
+      t[1].split('\n').forEach(function(p,i){
+        if(i>0)lines.push([]);
+        if(p)lines[lines.length-1].push(t[0]?'<span class="t-'+t[0]+'">'+esc(p)+'</span>':esc(p));
+      });
+    });
+    if(plain)return lines.map(function(l){return l.join('');}).join('\n');
+    return lines.map(function(l,n){return '<span class="ln" data-n="'+(n+1)+'">'+(l.join('')||' ')+'</span>';}).join('');
+  }
+  window.IHM={hl:function(c,l){return render(tokens(c,l));},hlPlain:function(c,l){return render(tokens(c,l),true);},esc:esc};
+
+  var SC='<'+'script>',SE='<'+'/script>';
+  var CONSOLE='<style>#__c{font:12.5px/1.6 Consolas,monospace;background:#0b1020;color:#c9d1f5;padding:10px 14px;margin-top:16px;border-radius:10px;white-space:pre-wrap}#__c div{border-bottom:1px solid #1e2748;padding:3px 0}#__c .e{color:#f87171}#__c .w{color:#fbbf24}#__c b{color:#22d3ee}</style>'+SC+
+  '(function(){var q=[],box=null;function f(x){if(typeof x==="string")return x;try{return JSON.stringify(x)}catch(e){return String(x)}}'+
+  'function add(c,a){if(!box){q.push([c,a]);return}var d=document.createElement("div");d.className=c;d.textContent="> "+[].map.call(a,f).join(" ");box.appendChild(d)}'+
+  'var L=console.log;console.log=function(){add("",arguments);L.apply(console,arguments)};console.info=console.log;console.table=console.log;'+
+  'console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'+
+  'window.addEventListener("error",function(e){add("e",["Uncaught "+e.message])});'+
+  'document.addEventListener("DOMContentLoaded",function(){box=document.createElement("div");box.id="__c";box.innerHTML="<b>Console</b>";document.body.appendChild(box);q.forEach(function(x){add(x[0],x[1])});q=[]})})()'+SE;
+  function wrapDoc(src,lang,cons){
+    var base='<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;line-height:1.6;color:#1e293b}</style>';
+    var doc;
+    if(lang==='css')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'<style>'+src+'</style></head><body></body></html>';
+    else if(lang==='js')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'</head><body>'+SC+src+SE+'</body></html>';
+    else if(/<html/i.test(src))doc=src;
+    else doc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'+base+'</head><body>'+src+'</body></html>';
+    if(cons){doc=/<head[^>]*>/i.test(doc)?doc.replace(/<head([^>]*)>/i,'<head$1>'+CONSOLE):CONSOLE+doc;}
+    return doc;
+  }
+
+  document.querySelectorAll('.code[data-src]').forEach(function(box){
+    var el=document.getElementById(box.dataset.src);
+    if(!el){box.textContent='Missing source: '+box.dataset.src;return;}
+    var orig=el.textContent.replace(/<\\\/script>/g,SE).replace(/^\n+|\s+$/g,''),src=orig;
+    var lang=box.dataset.lang||'html',run=box.hasAttribute('data-run'),cons=box.hasAttribute('data-console');
+    box.innerHTML='<div class="code-h"><span class="lbl">'+(box.dataset.label||lang)+'</span><div class="acts">'+
+      (run?'<button data-act="run">Run</button><button data-act="edit">Edit live</button>':'')+'<button data-act="copy">Copy</button></div></div><pre>'+IHM.hl(src,lang)+'</pre>'+
+      (run?'<div class="preview"><iframe title="Live preview" loading="lazy"></iframe></div>':'');
+    var pre=box.querySelector('pre');
+    box.querySelector('[data-act="copy"]').onclick=function(){
+      var done=function(){toast('Copied to clipboard');};
+      if(navigator.clipboard)navigator.clipboard.writeText(src).then(done,fallback);else fallback();
+      function fallback(){var ta=document.createElement('textarea');ta.value=src;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();done();}
+    };
+    if(!run)return;
+    var pv=box.querySelector('.preview'),fr=pv.querySelector('iframe'),bRun=box.querySelector('[data-act="run"]'),bEd=box.querySelector('[data-act="edit"]'),ta=null,tm;
+    function show(){fr.srcdoc=wrapDoc(src,lang,cons);}
+    bRun.onclick=function(){
+      var open=pv.classList.toggle('open');
+      if(open)show();
+      bRun.textContent=open?'Hide':'Run';bRun.classList.toggle('on',open);refreshSol(box);
+    };
+    bEd.onclick=function(){
+      if(!ta){
+        ta=document.createElement('textarea');ta.value=src;ta.spellcheck=false;
+        ta.style.height=Math.max(260,pre.offsetHeight)+'px';
+        pre.replaceWith(ta);bEd.textContent='Reset';bEd.classList.add('on');
+        if(!pv.classList.contains('open')){pv.classList.add('open');bRun.textContent='Hide';bRun.classList.add('on');}
+        show();
+        ta.addEventListener('input',function(){src=ta.value;clearTimeout(tm);tm=setTimeout(show,350);});
+        ta.addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDefault();var s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end');src=ta.value;}});
+        ta.focus();
+      }else{
+        src=orig;pre.innerHTML=IHM.hl(src,lang);ta.replaceWith(pre);ta=null;bEd.textContent='Edit live';bEd.classList.remove('on');show();
+      }
+      refreshSol(box);
+    };
+  });
+  function toast(t){var e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(function(){e.classList.remove('show');},1600);}
+  window.IHM.toast=toast;
+  function refreshSol(el){var s=el.closest('.sol');if(s&&s.classList.contains('on'))setTimeout(function(){s.style.maxHeight=s.scrollHeight+600+'px';},40);}
+  window.IHM.refreshSol=refreshSol;
+  document.querySelectorAll('[data-sol]').forEach(function(btn){
+    var sol=btn.nextElementSibling;
+    btn.onclick=function(){
+      var on=sol.classList.toggle('on');
+      sol.style.maxHeight=on?sol.scrollHeight+600+'px':'0';
+      btn.textContent=on?'Hide solution':'Show solution';
+    };
+  });
+
+  var TL=["const form = document.querySelector(\"#search\");", "const list = document.querySelector(\"#results\");", "", "form.addEventListener(\"submit\", (event) => {", "  event.preventDefault();", "  const term = form.elements.q.value.trim();", "  const li = document.createElement(\"li\");", "  li.textContent = `Searching for ${term}`;", "  list.append(li);", "});"],TLANG='js',full=TL.join('\n'),k=0,tp=document.getElementById('typed');
+  (function type(){
+    if(!tp)return;
+    if(k<=full.length){tp.innerHTML=IHM.hlPlain(full.slice(0,k),TLANG)+'<span class="caret"></span>';k++;setTimeout(type,full[k-1]==='\n'?170:26);}
+    else setTimeout(function(){k=0;type();},4200);
+  })();
+  var term=document.getElementById('term');
+  if(term){
+    term.addEventListener('mousemove',function(e){var r=term.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;term.style.transform='perspective(900px) rotateY('+(x*14)+'deg) rotateX('+(-y*14)+'deg)';});
+    term.addEventListener('mouseleave',function(){term.style.transform='';});
+  }
+  var glow=document.getElementById('glow');
+  window.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+  document.querySelectorAll('.rv,[data-io]').forEach(function(el){io.observe(el);});
+
+  var secs=[].slice.call(document.querySelectorAll('section[id]')),nav=document.getElementById('sidenav');
+  secs.forEach(function(s){var a=document.createElement('a');a.href='#'+s.id;a.innerHTML='<span>'+(s.dataset.title||s.id)+'</span>';nav.appendChild(a);});
+  var links=nav.querySelectorAll('a'),last=0,bar=document.getElementById('topbar'),top=document.getElementById('toTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,y=h.scrollTop;
+    document.getElementById('progress').style.width=(y/Math.max(1,h.scrollHeight-h.clientHeight)*100)+'%';
+    bar.classList.toggle('hide',y>last&&y>200);last=y;top.classList.toggle('show',y>600);
+    var cur=0;secs.forEach(function(s,i){if(s.offsetTop-window.innerHeight/2<=y)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur);});
+  },{passive:true});
+  top.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+  var tb=document.getElementById('themeBtn');
+  tb.onclick=function(){var r=document.documentElement,l=r.getAttribute('data-theme')==='light';r.setAttribute('data-theme',l?'dark':'light');tb.textContent=l?'Light mode':'Dark mode';};
+
+  var Q=[{"q": "What does <code>document.querySelectorAll(\".card\")<\/code> return?", "o": ["The first matching element", "A static NodeList of all matching elements", "An array of strings", "null if there are several"], "a": 1}, {"q": "Why prefer <code>textContent<\/code> to <code>innerHTML<\/code> when inserting user-provided text?", "o": ["It is faster to type", "It does not interpret markup, preventing script injection (XSS)", "It supports more languages", "innerHTML is deprecated"], "a": 1}, {"q": "During bubbling, an event travels:", "o": ["From the window down to the target", "From the target up through its ancestors", "Only to the target", "To sibling elements"], "a": 1}, {"q": "Event delegation consists of:", "o": ["Adding a listener to each child", "Placing one listener on a common ancestor and identifying the target", "Calling stopPropagation everywhere", "Using inline onclick attributes"], "a": 1}, {"q": "Which call prevents a form from reloading the page on submission?", "o": ["event.stopPropagation()", "event.preventDefault()", "return true", "form.reset()"], "a": 1}],qb=document.getElementById('quizBox');
+  if(qb){
+    var score=0,done=0,res=document.createElement('div');res.className='score gtxt';
+    Q.forEach(function(it,qi){
+      var d=document.createElement('div');d.className='q';
+      d.innerHTML='<p>'+(qi+1)+'. '+it.q+'</p><div class="opts"></div>';
+      var o=d.querySelector('.opts');
+      it.o.forEach(function(t,oi){
+        var b=document.createElement('button');b.className='opt';b.innerHTML=t;
+        b.onclick=function(){
+          if(d.dataset.done)return;d.dataset.done=1;done++;
+          if(oi===it.a){b.classList.add('right');score++;}else{b.classList.add('wrong');o.children[it.a].classList.add('right');}
+          if(done===Q.length)res.textContent='Your score: '+score+' / '+Q.length+(score===Q.length?' - Excellent.':score>=3?' - Good; review the items you missed.':' - Please revisit the lesson before the next session.');
+        };
+        o.appendChild(b);
+      });
+      qb.appendChild(d);
+    });
+    qb.appendChild(res);
+  }
+})();
+</script>
+<script>
+(function(){
+'use strict';
+/* ---------- propagation visualiser ---------- */
+var boxes=['pDoc','pSec','pArt','pBtnBox'],names={pDoc:'document',pSec:'section',pArt:'article',pBtnBox:'button'};
+var log=document.getElementById('pLog'),busy=false;
+function step(list,i,done){
+  if(i>=list.length){done&&done();return;}
+  var s=list[i];
+  boxes.forEach(function(b){document.getElementById(b).classList.remove('hl','up');});
+  var el=document.getElementById(s.id);el.classList.add('hl');if(s.ph==='b')el.classList.add('up');
+  if(s.stop)el.classList.add('stop');
+  var li=document.createElement('li');li.className=s.ph;li.textContent=s.txt;log.appendChild(li);
+  setTimeout(function(){if(s.stop){el.classList.remove('stop');}step(list,i+1,done);},620);
+}
+document.getElementById('pBtn').addEventListener('click',function(e){
+  e.stopPropagation();
+  if(busy)return;busy=true;log.innerHTML='';
+  var cap=document.getElementById('pCap').checked,stopAt=document.getElementById('pStop').value,seq=[],n=1,stopped=false;
+  if(cap){['pDoc','pSec','pArt'].forEach(function(id){if(stopped)return;seq.push({id:id,ph:'c',txt:(n++)+'. capture  '+names[id]+' listener'});if(stopAt===id+'c'){seq.push({id:id,ph:'s',stop:true,txt:'   stopPropagation() at '+names[id]});stopped=true;}});}
+  if(!stopped){seq.push({id:'pBtnBox',ph:'t',txt:(n++)+'. target   button listener (event.target === currentTarget)'});
+    ['pArt','pSec','pDoc'].forEach(function(id){if(stopped)return;seq.push({id:id,ph:'b',txt:(n++)+'. bubble   '+names[id]+' listener'});if(stopAt===id+'b'){seq.push({id:id,ph:'s',stop:true,txt:'   stopPropagation() at '+names[id]});stopped=true;}});}
+  step(seq,0,function(){boxes.forEach(function(b){document.getElementById(b).classList.remove('hl','up');});busy=false;});
+});
+/* ---------- XSS demo ---------- */
+var xi=document.getElementById('xssIn');
+function xss(){
+  document.getElementById('xssText').textContent=xi.value;
+  var safe=xi.value.replace(/<\s*\/?\s*(script|iframe|object|embed)[^>]*>/gi,'').replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,'').replace(/javascript:/gi,'');
+  document.getElementById('xssHtml').innerHTML=safe;
+  var danger=/on\w+\s*=|<script|javascript:/i.test(xi.value);
+  document.getElementById('xssWarn').innerHTML=danger?'<b style="color:var(--bad)">Danger:</b> with a raw <code class="i">innerHTML</code>, this input would execute code in the user\'s session. (The demonstration neutralises it before rendering.)':'Markup is <b>interpreted</b> by innerHTML but displayed <b>literally</b> by textContent.';
+}
+xi.addEventListener('input',xss);xss();
+})();
+</script>
+</body>
+</html>

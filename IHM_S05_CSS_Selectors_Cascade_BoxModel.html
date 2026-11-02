@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Human-Machine Interface, Session 05: Selectors, Cascade & Box Model. Dr. Gharbi Farouk, University of Tipaza.">
+<meta name="author" content="Dr. Gharbi Farouk">
+<title>IHM | Session 05 - Selectors, Cascade & Box Model</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#070b18;--bg2:#0d1430;--card:rgba(255,255,255,.045);--card-b:rgba(255,255,255,.09);
+  --txt:#e6e9f5;--mut:#9aa3c2;
+  --a1:#6366f1;--a2:#22d3ee;--a3:#a855f7;--a4:#f472b6;
+  --ok:#34d399;--warn:#fbbf24;--bad:#f87171;
+  --trk:#38bdf8;
+  --grad:linear-gradient(120deg,var(--a1),var(--a3) 45%,var(--a2));
+  --code-bg:#0a0f22;--shadow:0 20px 60px -20px rgba(0,0,0,.6);--r:20px;
+}
+:root[data-theme="light"]{
+  --bg:#f3f5fc;--bg2:#e7ebfa;--card:rgba(255,255,255,.78);--card-b:rgba(30,41,99,.12);
+  --txt:#141a33;--mut:#56608a;--shadow:0 20px 50px -25px rgba(40,50,120,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);line-height:1.75;font-size:17px;overflow-x:hidden;transition:background .6s,color .6s}
+::selection{background:var(--a3);color:#fff}
+.aurora{position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none}
+.aurora span{position:absolute;width:55vmax;height:55vmax;border-radius:50%;filter:blur(90px);opacity:.28;animation:float 22s ease-in-out infinite}
+.aurora span:nth-child(1){background:var(--a1);top:-20vmax;left:-15vmax}
+.aurora span:nth-child(2){background:var(--a2);bottom:-25vmax;right:-15vmax;animation-delay:-7s}
+.aurora span:nth-child(3){background:var(--trk);top:30%;left:35%;width:30vmax;height:30vmax;opacity:.16;animation-delay:-14s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(6vw,-5vh) scale(1.12)}66%{transform:translate(-5vw,6vh) scale(.92)}}
+.grid-bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,#000 30%,transparent 75%)}
+.glow{position:fixed;width:420px;height:420px;border-radius:50%;pointer-events:none;z-index:-1;background:radial-gradient(circle,rgba(99,102,241,.18),transparent 65%);transform:translate(-50%,-50%)}
+.progress{position:fixed;top:0;left:0;height:4px;width:0;background:var(--grad);z-index:100;box-shadow:0 0 18px var(--a2)}
+.topbar{position:fixed;top:4px;left:0;right:0;z-index:90;display:flex;justify-content:space-between;align-items:center;padding:10px 22px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);background:rgba(7,11,24,.55);border-bottom:1px solid var(--card-b);transition:transform .4s}
+:root[data-theme="light"] .topbar{background:rgba(243,245,252,.7)}
+.topbar.hide{transform:translateY(-120%)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700}
+.logo{width:40px;height:40px;border-radius:12px;background:var(--grad);display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:#fff;font-weight:600;box-shadow:0 0 25px rgba(168,85,247,.5)}
+.brand small{display:block;font-weight:400;color:var(--mut);font-size:12px;line-height:1.2}
+.tbtn{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:7px 16px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:14px;transition:.3s}
+.tbtn:hover{border-color:var(--a2);box-shadow:0 0 20px rgba(34,211,238,.35)}
+.sidenav{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:80;display:flex;flex-direction:column;gap:12px}
+.sidenav a{position:relative;width:12px;height:12px;border-radius:50%;background:var(--card-b);display:block;transition:.35s}
+.sidenav a.active{background:var(--a2);box-shadow:0 0 0 5px rgba(34,211,238,.18),0 0 16px var(--a2);transform:scale(1.25)}
+.sidenav a span{position:absolute;right:24px;top:50%;transform:translateY(-50%) translateX(8px);white-space:nowrap;font-size:13px;background:var(--bg2);border:1px solid var(--card-b);padding:3px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:.3s;color:var(--txt)}
+.sidenav a:hover span{opacity:1;transform:translateY(-50%) translateX(0)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+section{padding:90px 0 30px}
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:110px}
+.hero-inner{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;width:100%}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:999px;border:1px solid var(--card-b);background:var(--card);font-size:14px;color:var(--mut)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--trk);box-shadow:0 0 10px var(--trk);animation:pulse 1.8s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.hero h1{font-size:clamp(2.2rem,5vw,3.7rem);line-height:1.12;font-weight:800;margin:20px 0 16px;letter-spacing:-.02em}
+.gtxt{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.hero p.lead{color:var(--mut);font-size:1.1rem;max-width:580px}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.meta div{padding:10px 16px;border-radius:14px;background:var(--card);border:1px solid var(--card-b);font-size:14px}
+.meta b{display:block;color:var(--a2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.cta{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}
+.btn{position:relative;overflow:hidden;border:none;padding:13px 28px;border-radius:14px;font-family:inherit;font-weight:700;font-size:15px;cursor:pointer;color:#fff;background:var(--grad);background-size:200%;box-shadow:0 10px 30px -10px var(--a3);transition:.4s;text-decoration:none;display:inline-block}
+.btn:hover{background-position:100%;transform:translateY(-3px);box-shadow:0 18px 40px -12px var(--a3)}
+.btn.ghost{background:transparent;border:1px solid var(--card-b);color:var(--txt);box-shadow:none}
+.btn.ghost:hover{border-color:var(--a1)}
+.term{background:var(--code-bg);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);box-shadow:var(--shadow),0 0 60px -20px var(--a1);overflow:hidden;transition:transform .2s}
+.term-h{display:flex;gap:7px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08);align-items:center}
+.term-h i{width:11px;height:11px;border-radius:50%;background:#ff5f57}
+.term-h i:nth-child(2){background:#febc2e}.term-h i:nth-child(3){background:#28c840}
+.term-h span{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#5b6591}
+.term pre{padding:20px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#c9d1f5;min-height:300px;white-space:pre-wrap}
+.caret{display:inline-block;width:8px;height:17px;background:var(--a2);vertical-align:middle;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sec-h{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.num{flex:none;width:58px;height:58px;border-radius:18px;display:grid;place-items:center;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:20px;color:#fff;background:var(--grad);box-shadow:0 10px 30px -10px var(--a1)}
+.sec-h h2{font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.25;letter-spacing:-.01em}
+.sec-h small{display:block;color:var(--mut);font-size:13px;font-weight:500;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+h3{font-size:1.22rem;margin:26px 0 10px;color:var(--a2)}
+h4{margin:16px 0 6px}
+p{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--r);padding:26px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:var(--shadow);margin-bottom:20px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(140deg,rgba(99,102,241,.5),transparent 40%,transparent 60%,rgba(34,211,238,.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.card>h3:first-child{margin-top:0}
+code.i{font-family:'JetBrains Mono',monospace;font-size:.84em;background:rgba(99,102,241,.16);color:#a5b4fc;padding:1px 7px;border-radius:6px;white-space:nowrap}
+:root[data-theme="light"] code.i{color:#4338ca}
+ul.list{list-style:none;margin:8px 0 14px}
+ul.list li{position:relative;padding-left:26px;margin-bottom:6px}
+ul.list li::before{content:"";position:absolute;left:4px;top:11px;width:9px;height:9px;border-radius:3px;background:var(--grad);transform:rotate(45deg)}
+ol.steps{margin:8px 0 14px 22px}
+ol.steps li{margin-bottom:6px;padding-left:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.note{border-left:4px solid var(--a2);background:rgba(34,211,238,.07);padding:14px 18px;border-radius:12px;margin:16px 0}
+.note.warn{border-color:var(--warn);background:rgba(251,191,36,.07)}
+.note.ok{border-color:var(--ok);background:rgba(52,211,153,.07)}
+.note.def{border-color:var(--a3);background:rgba(168,85,247,.08)}
+.note b:first-child{display:block;margin-bottom:2px}
+.obj{display:flex;gap:14px;align-items:flex-start;padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--card-b);transition:.4s}
+.obj:hover{transform:translateY(-6px);border-color:var(--a3);box-shadow:0 20px 40px -20px var(--a3)}
+.obj .n{flex:none;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--a2);font-size:22px;line-height:1.3}
+.road{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.track{border-radius:var(--r);padding:20px;background:var(--card);border:1px solid var(--card-b)}
+.track h4{font-family:'JetBrains Mono',monospace;font-size:18px;margin:0 0 12px}
+.track.html h4{color:#fb923c}.track.css h4{color:#38bdf8}.track.js h4{color:#facc15}
+.step{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:12px;margin-bottom:8px;font-size:14px;border:1px solid transparent;transition:.3s;text-decoration:none;color:inherit}
+.step b{font-family:'JetBrains Mono',monospace;font-size:12px;padding:2px 8px;border-radius:8px;background:rgba(255,255,255,.07)}
+.step.done{opacity:.62}.step.done b{background:var(--ok);color:#052e1f}
+.step.now{border-color:var(--a2);background:rgba(34,211,238,.09);box-shadow:0 0 25px -8px var(--a2)}
+.step.now b{background:var(--a2);color:#062029}
+.step:hover{background:rgba(255,255,255,.05)}
+.code{margin:16px 0;border-radius:16px;overflow:hidden;background:var(--code-bg);border:1px solid rgba(255,255,255,.08);box-shadow:var(--shadow)}
+.code-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;background:rgba(255,255,255,.035);border-bottom:1px solid rgba(255,255,255,.07);flex-wrap:wrap}
+.code-h .lbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b93b8;display:flex;gap:8px;align-items:center}
+.code-h .lbl::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--dot,#fb923c);box-shadow:0 0 8px var(--dot,#fb923c)}
+.code[data-lang="css"]{--dot:#38bdf8}.code[data-lang="js"]{--dot:#facc15}
+.code-h .acts{display:flex;gap:6px}
+.code-h button{font-family:inherit;font-size:12px;border:1px solid rgba(255,255,255,.12);background:transparent;color:#c9d1f5;padding:3px 12px;border-radius:8px;cursor:pointer;transition:.25s}
+.code-h button:hover,.code-h button.on{background:var(--a1);border-color:var(--a1)}
+.code pre{padding:18px;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;color:#d5dbf5}
+.code pre .ln{display:block;padding-left:42px;position:relative;white-space:pre}
+.code pre .ln::before{content:attr(data-n);position:absolute;left:0;width:28px;text-align:right;color:#3d4670;font-size:12px}
+.code textarea{display:block;width:100%;min-height:260px;padding:18px;border:0;outline:0;resize:vertical;background:#070b1a;color:#e6e9f5;font-family:'JetBrains Mono',monospace;font-size:13.5px;line-height:1.75;tab-size:2;white-space:pre}
+.t-tag{color:#f472b6}.t-att{color:#7dd3fc}.t-str{color:#a3e635}.t-com{color:#5b6591;font-style:italic}.t-ent{color:#fbbf24}.t-pun{color:#8b93b8}
+.t-kw{color:#c084fc}.t-num{color:#fb923c}.t-fn{color:#38bdf8}.t-sel{color:#f9a8d4}.t-prop{color:#7dd3fc}.t-at{color:#c084fc}
+.preview{display:none;border-top:1px solid rgba(255,255,255,.08);background:#fff}
+.preview.open{display:block;animation:drop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes drop{from{opacity:0;transform:translateY(-10px)}}
+.preview iframe{width:100%;height:360px;border:0;display:block;background:#fff}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;margin:14px 0;font-size:15px;border-radius:14px;overflow:hidden;border:1px solid var(--card-b)}
+.tbl th{background:linear-gradient(120deg,rgba(99,102,241,.35),rgba(168,85,247,.25));padding:11px;text-align:left}
+.tbl td{padding:10px 11px;border-top:1px solid var(--card-b);vertical-align:top}
+.tbl tr:hover td{background:rgba(255,255,255,.035)}
+.tblw{overflow-x:auto}
+.ex{border-radius:var(--r);background:var(--card);border:1px solid var(--card-b);margin-bottom:22px;overflow:hidden;box-shadow:var(--shadow)}
+.ex-h{display:flex;align-items:center;gap:16px;padding:20px 24px;background:linear-gradient(120deg,rgba(99,102,241,.14),transparent)}
+.ex-h .tag{font-family:'JetBrains Mono',monospace;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--grad);color:#fff;font-size:14px;white-space:nowrap}
+.ex-h h3{margin:0;color:var(--txt);font-size:1.12rem}
+.lvl-b{margin-left:auto;font-size:12px;padding:3px 12px;border-radius:999px;border:1px solid;white-space:nowrap}
+.lvl-b.m{color:var(--warn);border-color:var(--warn)}.lvl-b.a{color:var(--bad);border-color:var(--bad)}.lvl-b.e{color:var(--ok);border-color:var(--ok)}
+.ex-b{padding:6px 24px 22px}
+.sol-btn{margin-top:10px}
+.sol{max-height:0;overflow:hidden;transition:max-height .8s cubic-bezier(.2,.8,.2,1)}
+.sol-in{padding-top:14px}
+.hw{position:relative;border-radius:26px;padding:34px;background:linear-gradient(135deg,rgba(99,102,241,.22),rgba(168,85,247,.16) 50%,rgba(34,211,238,.16));border:1px solid rgba(168,85,247,.4);overflow:hidden}
+.hw::after{content:"";position:absolute;width:300px;height:300px;border-radius:50%;background:var(--a2);filter:blur(120px);opacity:.25;top:-100px;right:-80px;pointer-events:none}
+.hw h3{font-size:1.5rem;margin-top:0;color:var(--txt)}
+.dead{display:inline-block;margin-top:14px;padding:8px 18px;border-radius:12px;background:rgba(0,0,0,.25);font-weight:700}
+:root[data-theme="light"] .dead{background:rgba(255,255,255,.6)}
+.q{margin-bottom:18px}
+.q p{font-weight:700}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:1px solid var(--card-b);background:var(--card);color:var(--txt);padding:11px 14px;border-radius:12px;cursor:pointer;font-family:inherit;font-size:15px;text-align:left;transition:.3s}
+.opt:hover{border-color:var(--a1);transform:translateX(4px)}
+.opt.right{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.13);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(6px)}75%{transform:translateX(-6px)}}
+.score{font-size:1.2rem;font-weight:700;margin-top:10px}
+.refs li{margin-bottom:6px}
+.refs a{color:var(--a2)}
+.rv{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.8,.2,1),transform .9s cubic-bezier(.2,.8,.2,1)}
+.rv.in{opacity:1;transform:none}
+.rv.d1{transition-delay:.1s}.rv.d2{transition-delay:.2s}.rv.d3{transition-delay:.3s}
+/* widgets shared */
+.ctl{display:flex;flex-wrap:wrap;gap:14px;margin:12px 0}
+.ctl label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--mut);min-width:150px;flex:1}
+.ctl select,.ctl input[type=text],.ctl input[type=number]{font-family:'JetBrains Mono',monospace;font-size:13px;padding:8px 10px;border-radius:10px;border:1px solid var(--card-b);background:var(--bg2);color:var(--txt)}
+.ctl input[type=range]{accent-color:var(--a2)}
+.stage{border-radius:14px;border:1px dashed var(--card-b);padding:14px;background:rgba(0,0,0,.18);min-height:120px}
+:root[data-theme="light"] .stage{background:rgba(255,255,255,.5)}
+.mono{font-family:'JetBrains Mono',monospace}
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(99,102,241,.18);color:#c7d2fe;margin:2px}
+:root[data-theme="light"] .pill{color:#3730a3}
+footer{margin-top:80px;padding:40px 0;border-top:1px solid var(--card-b);text-align:center;color:var(--mut);font-size:14px}
+footer b{color:var(--txt)}
+footer a{color:var(--a2);text-decoration:none}
+.toTop{position:fixed;bottom:24px;right:24px;width:48px;height:48px;border-radius:14px;border:none;background:var(--grad);color:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:12px;cursor:pointer;opacity:0;transform:translateY(20px);transition:.4s;z-index:80;box-shadow:0 10px 30px -10px var(--a3)}
+.toTop.show{opacity:1;transform:none}
+.toast{position:fixed;bottom:30px;left:50%;transform:translate(-50%,140px);background:var(--grad);color:#fff;padding:10px 24px;border-radius:12px;font-weight:700;z-index:200;transition:.4s}
+.toast.show{transform:translate(-50%,0)}
+.anat{font-family:'JetBrains Mono',monospace;font-size:clamp(14px,2.4vw,20px);background:var(--code-bg);border-radius:16px;padding:26px;color:#c9d1f5;line-height:2.1;text-align:center}
+.anat span{padding:3px 6px;border-radius:8px;border-bottom:3px solid currentColor;cursor:help;transition:.3s}
+.anat span:hover{background:rgba(255,255,255,.08)}
+.a-sel{color:#f9a8d4}.a-prop{color:#7dd3fc}.a-val{color:#a3e635}.a-pun{color:#8b93b8;border:none!important}
+.legend{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:12px;font-size:14px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.selpg{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+#selIn{width:100%;font-family:'JetBrains Mono',monospace;font-size:15px;padding:12px 14px;border-radius:12px;border:1px solid var(--card-b);background:var(--code-bg);color:#a5b4fc}
+#selIn:focus{outline:2px solid var(--a2)}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.presets button{font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 10px;border-radius:8px;border:1px solid var(--card-b);background:var(--card);color:var(--txt);cursor:pointer}
+.presets button:hover{border-color:var(--a2)}
+.dom{font-family:'JetBrains Mono',monospace;font-size:13px}
+.dom *{transition:.35s}
+.dom .x{display:block;margin:4px 0 4px 16px;padding:3px 8px;border-radius:8px;border:1px solid transparent;font-size:13px;font-weight:400;list-style:none;color:var(--txt);text-decoration:none;line-height:1.5}
+.dom ul.x{padding-left:8px}
+.dom .x::before{content:attr(data-t);color:#f472b6}
+.dom .hit{background:rgba(34,211,238,.18);border-color:var(--a2);box-shadow:0 0 18px -4px var(--a2);transform:translateX(4px)}
+.specout{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.specout div{flex:1;min-width:90px;text-align:center;padding:12px;border-radius:14px;background:var(--card);border:1px solid var(--card-b)}
+.specout b{display:block;font-size:2rem;font-family:'JetBrains Mono',monospace;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.specout small{color:var(--mut)}
+#selMsg{margin-top:10px;font-size:14px;color:var(--mut)}
+.bm{display:grid;grid-template-columns:1fr 1.1fr;gap:20px;align-items:center}
+.bm-vis{display:flex;justify-content:center;padding:10px;overflow:hidden}
+.bm-m{background:repeating-linear-gradient(45deg,rgba(251,191,36,.18) 0 6px,rgba(251,191,36,.08) 6px 12px);border:1px dashed #fbbf24;position:relative;transition:padding .35s}
+.bm-b{background:#f472b6;transition:padding .35s}
+.bm-p{background:rgba(52,211,153,.35);transition:padding .35s}
+.bm-c{background:rgba(56,189,248,.55);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;display:grid;place-items:center;height:70px;transition:width .35s}
+.bm-lbl{position:absolute;top:2px;left:6px;font-size:10px;font-family:'JetBrains Mono',monospace;color:#fbbf24}
+.calc{font-family:'JetBrains Mono',monospace;font-size:14px;background:var(--code-bg);color:#c9d1f5;border-radius:12px;padding:14px;margin-top:10px;line-height:1.9}
+.calc b{color:#a3e635}
+@media (max-width:900px){.selpg,.bm{grid-template-columns:1fr}}
+@media (max-width:900px){
+  .hero-inner,.grid2,.road{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .sidenav{display:none}
+  .term{display:none}
+}
+@media (max-width:560px){
+  body{font-size:16px}
+  .grid3,.opts{grid-template-columns:1fr}
+  .brand small{display:none}
+  .card,.hw{padding:20px}
+  .ex-h{flex-wrap:wrap;padding:16px}
+  .lvl-b{margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="aurora"><span></span><span></span><span></span></div>
+<div class="grid-bg"></div>
+<div class="glow" id="glow"></div>
+<div class="progress" id="progress"></div>
+
+<header class="topbar" id="topbar">
+  <div class="brand">
+    <div class="logo">IHM</div>
+    <div>Human-Machine Interface<small>Business Computing &middot; Year 1 &middot; Session 05</small></div>
+  </div>
+  <button class="tbtn" id="themeBtn">Light mode</button>
+</header>
+<nav class="sidenav" id="sidenav" aria-label="Section navigation"></nav>
+
+<section class="hero" id="home" data-title="Overview">
+  <div class="wrap hero-inner">
+    <div>
+      <span class="chip rv"><i></i> Session 05 of 12 &middot; CSS Track</span>
+      <h1 class="rv d1">Selectors, Cascade<br>&amp; the <span class="gtxt">Box Model</span></h1>
+      <p class="lead rv d2">CSS is a declarative language of rules. This session examines how rules target elements, how the cascade resolves conflicts between competing declarations, and how every element is rendered as a rectangular box whose dimensions follow precise arithmetic.</p>
+      <div class="meta rv d3">
+        <div><b>Institution</b>University of Tipaza</div>
+        <div><b>Faculty</b>Economics, Commerce &amp; Management Sciences</div>
+        <div><b>Lecturer</b>Dr. Gharbi Farouk</div>
+        <div><b>Duration</b>90 minutes</div>
+      </div>
+      <div class="cta rv d3">
+        <a class="btn" href="#s1">Start the lecture</a>
+        <a class="btn ghost" href="#exercises">Practical exercises</a>
+      </div>
+    </div>
+    <div class="term rv d2" id="term">
+      <div class="term-h"><i></i><i></i><i></i><span>style.css</span></div>
+      <pre id="typed"></pre>
+    </div>
+  </div>
+</section>
+<section id="goals" data-title="Learning outcomes"><div class="wrap">
+  <div class="sec-h rv"><div class="num">00</div><h2>Learning Outcomes<small>By the end of this session, students will be able to</small></h2></div>
+  <div class="grid2"><div class="obj rv d0"><div class="n">01</div><div>Integrate CSS through external stylesheets and describe the anatomy of a rule.</div></div><div class="obj rv d1"><div class="n">02</div><div>Write precise selectors using classes, attributes, combinators, pseudo-classes and pseudo-elements.</div></div><div class="obj rv d2"><div class="n">03</div><div>Predict the winning declaration by applying origin, specificity, source order and inheritance.</div></div><div class="obj rv d3"><div class="n">04</div><div>Compute the rendered dimensions of a box and control them with <code class="i">box-sizing</code>.</div></div></div>
+  <h3 class="rv" style="margin-top:40px">Course roadmap: 12 sessions</h3>
+  <div class="road"><div class="track html rv"><h4>HTML</h4><a class="step done" href="IHM_S01_HTML_Semantic_Structure.html"><b>01</b>Semantic Document Structure</a><a class="step done" href="IHM_S02_HTML_Links_Multimedia.html"><b>02</b>Hyperlinks &amp; Multimedia</a><a class="step done" href="IHM_S03_HTML_Lists_Tables.html"><b>03</b>Lists &amp; Advanced Tables</a><a class="step done" href="IHM_S04_HTML_Forms_Accessibility.html"><b>04</b>Forms &amp; Accessibility</a></div><div class="track css rv"><h4>CSS</h4><a class="step now" href="IHM_S05_CSS_Selectors_Cascade_BoxModel.html"><b>05</b>Selectors, Cascade &amp; Box Model</a><a class="step " href="IHM_S06_CSS_Flexbox_Grid.html"><b>06</b>Flexbox &amp; Grid Layout</a><a class="step " href="IHM_S07_CSS_Responsive_Design.html"><b>07</b>Responsive Design</a><a class="step " href="IHM_S08_CSS_Transitions_Animations.html"><b>08</b>Transitions &amp; Animations</a></div><div class="track js rv"><h4>JavaScript</h4><a class="step " href="IHM_S09_JS_Fundamentals.html"><b>09</b>Variables, Types &amp; Control Flow</a><a class="step " href="IHM_S10_JS_Functions_Arrays_Objects.html"><b>10</b>Functions, Arrays &amp; Objects</a><a class="step " href="IHM_S11_JS_DOM_Events.html"><b>11</b>DOM Manipulation &amp; Events</a><a class="step " href="IHM_S12_JS_Integrated_Project.html"><b>12</b>Integrated Interface Project</a></div></div>
+  <div class="note rv"><b>Recap of the previous session</b>The HTML track (Sessions 01-04) produced well-structured, semantic and accessible documents, deliberately without styling. We now add the presentation layer.</div>
+</div></section>
+<section id="s1" data-title="Anatomy of CSS"><div class="wrap"><div class="sec-h rv"><div class="num">01</div><h2>Anatomy and Integration of CSS<small>Rules, declarations and stylesheets</small></h2></div>
+<div class="card rv">
+<p>A stylesheet is an ordered set of <b>rules</b>. Each rule consists of a <b>selector</b>, which determines the elements concerned, and a <b>declaration block</b> containing <code class="i">property: value</code> pairs separated by semicolons.</p>
+<div class="anat">
+<span class="a-sel" title="Selector">.card h2</span> <span class="a-pun">{</span><br>
+&nbsp;&nbsp;<span class="a-prop" title="Property">color</span><span class="a-pun">:</span> <span class="a-val" title="Value">#1e293b</span><span class="a-pun">;</span><br>
+&nbsp;&nbsp;<span class="a-prop" title="Property">font-size</span><span class="a-pun">:</span> <span class="a-val" title="Value">1.5rem</span><span class="a-pun">;</span><br>
+<span class="a-pun">}</span>
+</div>
+<div class="legend"><span><i style="background:#f9a8d4"></i>Selector</span><span><i style="background:#7dd3fc"></i>Property</span><span><i style="background:#a3e635"></i>Value</span><span><i style="background:#8b93b8"></i>Declaration block</span></div>
+</div>
+<div class="card rv">
+<h3>Three methods of integration</h3>
+<div class="tblw"><table class="tbl">
+<tr><th>Method</th><th>Syntax</th><th>Assessment</th></tr>
+<tr><td>External stylesheet</td><td><code class="i">&lt;link rel="stylesheet" href="css/style.css"&gt;</code></td><td><b>Recommended.</b> One file shared by all pages; cached by the browser; complete separation of concerns.</td></tr>
+<tr><td>Internal stylesheet</td><td><code class="i">&lt;style&gt;...&lt;/style&gt;</code> in head</td><td>Acceptable for a single page or prototypes (as in this lecture's examples).</td></tr>
+<tr><td>Inline style</td><td><code class="i">style="color:red"</code></td><td>To be avoided: no reuse, highest priority, mixes content and presentation.</td></tr>
+</table></div>
+</div>
+<div class="code" data-src="c-first" data-label="first-stylesheet.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s2" data-title="Selectors"><div class="wrap"><div class="sec-h rv"><div class="num">02</div><h2>Selectors<small>Targeting elements with precision</small></h2></div>
+<div class="grid2">
+<div class="card rv"><h3>Simple selectors</h3>
+<ul class="list">
+<li><code class="i">p</code> type selector</li>
+<li><code class="i">.price</code> class selector</li>
+<li><code class="i">#cart</code> ID selector</li>
+<li><code class="i">*</code> universal selector</li>
+<li><code class="i">[type="email"]</code> attribute equals</li>
+<li><code class="i">[href^="https"]</code> starts with, <code class="i">[href$=".pdf"]</code> ends with, <code class="i">[class*="btn"]</code> contains</li>
+</ul></div>
+<div class="card rv d1"><h3>Combinators</h3>
+<ul class="list">
+<li><code class="i">nav a</code> descendant (any depth)</li>
+<li><code class="i">ul &gt; li</code> child (direct only)</li>
+<li><code class="i">h2 + p</code> adjacent sibling (immediately after)</li>
+<li><code class="i">h2 ~ p</code> general sibling (any later sibling)</li>
+<li><code class="i">h1, h2</code> selector list (grouping)</li>
+</ul></div>
+</div>
+<div class="grid2">
+<div class="card rv"><h3>Pseudo-classes: states and structure</h3>
+<p><code class="i">:hover</code> <code class="i">:focus-visible</code> <code class="i">:checked</code> <code class="i">:invalid</code> <code class="i">:first-child</code> <code class="i">:last-child</code> <code class="i">:nth-child(2n+1)</code> <code class="i">:not(.sold)</code> <code class="i">:is(h2,h3)</code> <code class="i">:where()</code> and the relational <code class="i">:has()</code>, which selects a parent according to its content: <code class="i">.card:has(img)</code>.</p></div>
+<div class="card rv d1"><h3>Pseudo-elements: generated parts</h3>
+<p><code class="i">::before</code> and <code class="i">::after</code> insert generated content (with the <code class="i">content</code> property); <code class="i">::first-line</code>, <code class="i">::first-letter</code>, <code class="i">::marker</code>, <code class="i">::placeholder</code> and <code class="i">::selection</code> style parts of an element that are not themselves elements.</p></div>
+</div>
+<div class="card rv">
+<h3>Selector laboratory</h3>
+<p>Type a selector, or choose a preset. Matching nodes of the document fragment are highlighted and the specificity of the first selector is computed live.</p>
+<input id="selIn" value="ul.products > li:not(.sold)" spellcheck="false" aria-label="CSS selector">
+<div class="presets"><button>li</button><button>.sold</button><button>#cart a</button><button>ul.products > li:nth-child(odd)</button><button>a[href$=".pdf"]</button><button>h2 + p</button><button>h2 ~ p</button><button>li:has(.promo)</button><button>:is(h2, p).intro</button></div>
+<div class="selpg">
+<div class="stage dom" id="domStage" aria-hidden="true">
+<article class="x" id="cart" data-t="article#cart">
+<h2 class="x" data-t="h2"></h2>
+<p class="x intro" data-t="p.intro"></p>
+<p class="x" data-t="p"></p>
+<ul class="x products" data-t="ul.products">
+<li class="x" data-t="li"></li>
+<li class="x sold" data-t="li.sold"></li>
+<li class="x" data-t="li"><span class="x promo" data-t="span.promo"></span></li>
+<li class="x" data-t="li"></li>
+</ul>
+<a class="x" data-t='a[href="guide.pdf"]' href="guide.pdf" tabindex="-1"></a>
+<a class="x" data-t='a[href="https://x.dz"]' href="https://x.dz" tabindex="-1"></a>
+</article>
+</div>
+<div>
+<div class="specout"><div><b id="sa">0</b><small>IDs (a)</small></div><div><b id="sb">0</b><small>Classes, attributes, pseudo-classes (b)</small></div><div><b id="sc">0</b><small>Types, pseudo-elements (c)</small></div></div>
+<div id="selMsg"></div>
+<div class="note"><b>How it works</b>The fragment on the left is real markup; the selector is evaluated by the browser engine itself with <code class="i">querySelectorAll()</code>, the same function you will use in Session 11. Each node displays its tag, classes and attributes.</div>
+</div>
+</div>
+</div>
+</div></section>
+
+<section id="s3" data-title="Cascade"><div class="wrap"><div class="sec-h rv"><div class="num">03</div><h2>The Cascade, Specificity and Inheritance<small>Resolving conflicting declarations</small></h2></div>
+<div class="card rv">
+<p>When several declarations assign a value to the same property of the same element, the <b>cascade</b> algorithm selects a single winner by comparing, in this order:</p>
+<ol class="steps">
+<li><b>Origin and importance</b>: user-agent styles &lt; author styles &lt; author <code class="i">!important</code> (with transitions and animations at specific levels).</li>
+<li><b>Cascade layers</b> (<code class="i">@layer</code>), when used: later layers win over earlier ones.</li>
+<li><b>Specificity</b>: a triple <code class="i">(a, b, c)</code> compared lexicographically, where <i>a</i> counts ID selectors, <i>b</i> classes, attributes and pseudo-classes, and <i>c</i> types and pseudo-elements. Inline styles outrank all selectors.</li>
+<li><b>Order of appearance</b>: if everything else is equal, the last declaration wins.</li>
+</ol>
+<div class="note def"><b>Lexicographic comparison</b><code class="i">(1,0,0)</code> beats <code class="i">(0,12,0)</code>: a single ID outweighs any number of classes. <code class="i">:where()</code> contributes zero specificity, whereas <code class="i">:is()</code>, <code class="i">:not()</code> and <code class="i">:has()</code> take the specificity of their most specific argument. The universal selector and combinators count for nothing.</div>
+</div>
+<div class="card rv">
+<h3>Inheritance</h3>
+<p>Some properties, mainly typographic ones (<code class="i">color</code>, <code class="i">font-family</code>, <code class="i">font-size</code>, <code class="i">line-height</code>, <code class="i">text-align</code>), are <b>inherited</b> by descendants that receive no value of their own. Box-related properties (<code class="i">margin</code>, <code class="i">padding</code>, <code class="i">border</code>, <code class="i">width</code>, <code class="i">background</code>) are not. The keywords <code class="i">inherit</code>, <code class="i">initial</code>, <code class="i">unset</code> and <code class="i">revert</code> control this behaviour explicitly. Note that an inherited value always loses to any declaration targeting the element directly, regardless of specificity.</p>
+</div>
+<div class="code" data-src="c-cascade" data-label="cascade.html" data-lang="html" data-run></div>
+<div class="note warn rv"><b>On !important</b>It short-circuits the specificity contest and leads to escalation (overriding an <code class="i">!important</code> requires another). Reserve it for utility classes and for overriding third-party styles you cannot modify.</div>
+</div></section>
+
+<section id="s4" data-title="Units and colours"><div class="wrap"><div class="sec-h rv"><div class="num">04</div><h2>Values, Units and Colours<small>Absolute, relative and custom</small></h2></div>
+<div class="grid2">
+<div class="card rv"><h3>Length units</h3>
+<div class="tblw"><table class="tbl">
+<tr><th>Unit</th><th>Reference</th></tr>
+<tr><td><code class="i">px</code></td><td>Absolute (a CSS reference pixel)</td></tr>
+<tr><td><code class="i">em</code></td><td>Font size of the element (or of the parent, for font-size)</td></tr>
+<tr><td><code class="i">rem</code></td><td>Font size of the root element: predictable and accessible</td></tr>
+<tr><td><code class="i">%</code></td><td>The corresponding dimension of the containing block</td></tr>
+<tr><td><code class="i">vw</code> / <code class="i">vh</code></td><td>1% of the viewport width / height</td></tr>
+<tr><td><code class="i">ch</code></td><td>Width of the "0" glyph: ideal for line length</td></tr>
+</table></div></div>
+<div class="card rv d1"><h3>Colour notations</h3>
+<ul class="list">
+<li><code class="i">#6366f1</code> hexadecimal RGB</li>
+<li><code class="i">rgb(99 102 241 / 50%)</code> with alpha</li>
+<li><code class="i">hsl(239 84% 67%)</code> hue, saturation, lightness: intuitive for building palettes</li>
+<li><code class="i">oklch(0.58 0.2 277)</code> perceptually uniform, for modern design systems</li>
+</ul>
+<p><b>Custom properties</b> (CSS variables) centralise design tokens: declared as <code class="i">--brand: #6366f1;</code> on <code class="i">:root</code> and used as <code class="i">var(--brand)</code>. They cascade and inherit, and can be modified by JavaScript at run time.</p></div>
+</div>
+<div class="code" data-src="c-vars" data-label="design-tokens.html" data-lang="html" data-run></div>
+</div></section>
+
+<section id="s5" data-title="Box model"><div class="wrap"><div class="sec-h rv"><div class="num">05</div><h2>The Box Model<small>content, padding, border and margin</small></h2></div>
+<div class="card rv">
+<p>Every element generates a rectangular box composed of four concentric areas: the <b>content</b>, the <b>padding</b> (inner spacing, which takes the background), the <b>border</b>, and the <b>margin</b> (outer, transparent spacing). The <code class="i">box-sizing</code> property determines what <code class="i">width</code> and <code class="i">height</code> measure:</p>
+<ul class="list"><li><code class="i">content-box</code> (default): width applies to the content only; padding and border are added to it.</li><li><code class="i">border-box</code>: width includes padding and border; the content shrinks accordingly. Universally adopted in professional projects.</li></ul>
+<h3>Interactive box model</h3>
+<div class="ctl">
+<label>width: <b id="bv_w"></b><input type="range" id="bm_w" min="120" max="260" value="180"></label>
+<label>padding: <b id="bv_p"></b><input type="range" id="bm_p" min="0" max="40" value="20"></label>
+<label>border: <b id="bv_b"></b><input type="range" id="bm_b" min="0" max="16" value="6"></label>
+<label>margin: <b id="bv_m"></b><input type="range" id="bm_m" min="0" max="40" value="16"></label>
+<label>box-sizing<select id="bm_bs"><option>content-box</option><option>border-box</option></select></label>
+</div>
+<div class="bm">
+<div class="bm-vis"><div class="bm-m"><span class="bm-lbl">margin</span><div class="bm-b"><div class="bm-p"><div class="bm-c"></div></div></div></div></div>
+<div class="calc" id="calc"></div>
+</div>
+</div>
+<div class="code" data-src="c-box" data-label="box-sizing.html" data-lang="html" data-run></div>
+<div class="note def rv"><b>Margin collapsing</b>The vertical margins of adjacent block boxes in normal flow <i>collapse</i> into a single margin equal to the larger of the two: a paragraph with <code class="i">margin-bottom: 30px</code> followed by one with <code class="i">margin-top: 20px</code> are separated by 30px, not 50px. Horizontal margins, and margins inside flex or grid containers, never collapse.</div>
+<div class="note ok rv"><b>Investigating with DevTools</b>Press <kbd>F12</kbd>, select an element, and open the <i>Styles</i> and <i>Computed</i> panels: overridden declarations appear struck through, and the box-model diagram displays the exact dimensions. This is the primary diagnostic tool for any CSS problem.</div>
+</div></section>
+
+<section id="exercises" data-title="Exercises"><div class="wrap"><div class="sec-h rv"><div class="num">06</div><h2>Practical Exercises<small>Target, resolve, compute</small></h2></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 01</span><h3>Styling a faculty news page</h3><span class="lvl-b e">Foundational</span></div><div class="ex-b">
+<p>Given a semantic news page (header, nav, main with two articles, footer), write a stylesheet that:</p>
+<ul class="list"><li>Declares design tokens on <code class="i">:root</code>: a primary colour, a text colour, a background colour and a base spacing.</li><li>Sets a sans-serif font, a line height of 1.6 and a maximum content width of 70ch centred on the page.</li><li>Colours links with the primary colour, and underlines them only on hover and on keyboard focus.</li><li>Gives each <code class="i">article</code> a padding, a light border, rounded corners and a vertical margin.</li></ul>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in"><div class="code" data-src="sol1" data-label="solution-01.html" data-lang="html" data-run></div></div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 02</span><h3>Selector challenge</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Using the markup below, write <b>one</b> selector for each target, without adding classes or IDs:</p>
+<div class="code" data-src="e2" data-label="shop.html" data-lang="html"></div>
+<ol class="steps"><li>All prices inside product cards.</li><li>Only the first product card.</li><li>Product cards that contain a promotion badge.</li><li>Links pointing to PDF files.</li><li>External links (beginning with https).</li><li>The paragraph immediately following the main heading.</li><li>Every other row of the table (even rows).</li><li>Inputs that are required and currently invalid.</li></ol>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in">
+<div class="tblw"><table class="tbl"><tr><th>#</th><th>Selector</th><th>Specificity</th></tr>
+<tr><td>1</td><td><code class="i">.product .price</code></td><td>(0,2,0)</td></tr>
+<tr><td>2</td><td><code class="i">.product:first-child</code></td><td>(0,2,0)</td></tr>
+<tr><td>3</td><td><code class="i">.product:has(.badge)</code></td><td>(0,2,0)</td></tr>
+<tr><td>4</td><td><code class="i">a[href$=".pdf"]</code></td><td>(0,1,1)</td></tr>
+<tr><td>5</td><td><code class="i">a[href^="https"]</code></td><td>(0,1,1)</td></tr>
+<tr><td>6</td><td><code class="i">h1 + p</code></td><td>(0,0,2)</td></tr>
+<tr><td>7</td><td><code class="i">tbody tr:nth-child(even)</code></td><td>(0,1,2)</td></tr>
+<tr><td>8</td><td><code class="i">input:required:invalid</code></td><td>(0,2,1)</td></tr></table></div>
+<div class="note"><b>Tip</b>Paste each answer into the selector laboratory of section 02 to verify its specificity.</div>
+</div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 03</span><h3>Specificity puzzle</h3><span class="lvl-b m">Intermediate</span></div><div class="ex-b">
+<p>Predict the final colour of the heading and of the link, and justify each answer by reference to the cascade. Then click "Run" to check.</p>
+<div class="code" data-src="e3" data-label="puzzle.html" data-lang="html" data-run></div>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in">
+<div class="tblw"><table class="tbl"><tr><th>Element</th><th>Candidates</th><th>Winner and reason</th></tr>
+<tr><td>h2</td><td><code class="i">h2</code> (0,0,1) blue; <code class="i">.box h2</code> (0,1,1) green; <code class="i">#promo h2</code> (1,0,1) orange; <code class="i">.box .title</code> (0,2,0) purple</td><td><b>Orange</b>: the only rule with an ID selector, so (1,0,1) beats every other triple.</td></tr>
+<tr><td>a</td><td>inherited red from <code class="i">.box</code>; <code class="i">a</code> (0,0,1) grey; <code class="i">.box a</code> (0,1,1) teal, declared twice</td><td><b>Teal (second declaration, #0d9488)</b>: (0,1,1) beats (0,0,1); between the two equal rules, the later one wins. The inherited red never competes with a direct declaration.</td></tr></table></div>
+</div></div>
+</div></div>
+<div class="ex rv"><div class="ex-h"><span class="tag">EX 04</span><h3>Box arithmetic for a product card</h3><span class="lvl-b a">Advanced</span></div><div class="ex-b">
+<p>A product grid requires each card to occupy exactly <b>300px</b> horizontally including its border, with 20px of padding and a 2px border; cards are separated vertically by 24px.</p>
+<ol class="steps"><li>Under the default box sizing, what <code class="i">width</code> must be declared? What is the content width?</li><li>Rewrite the rule using <code class="i">border-box</code>. What is the content width now?</li><li>Card A has <code class="i">margin-bottom: 24px</code> and card B, below it, has <code class="i">margin-top: 16px</code>. What is the vertical gap, and why?</li></ol>
+<button class="btn ghost sol-btn" data-sol>Show solution</button><div class="sol"><div class="sol-in">
+<div class="calc">1. content-box: width = 300 - 2&times;20 - 2&times;2 = <b>256px</b>; content width = 256px.<br>2. border-box: width = <b>300px</b>; content width = 300 - 40 - 4 = <b>256px</b> (same result, but no arithmetic for the author).<br>3. Gap = max(24, 16) = <b>24px</b>: adjacent vertical margins in normal flow collapse.</div>
+<div class="code" data-src="sol4" data-label="solution-04.html" data-lang="html" data-run></div>
+</div></div>
+</div></div>
+</div></section>
+
+<section id="quiz" data-title="Quick quiz"><div class="wrap"><div class="sec-h rv"><div class="num">07</div><h2>Check Your Understanding<small>Formative assessment</small></h2></div><div class="card rv" id="quizBox"></div></div></section>
+
+<section id="homework" data-title="Homework"><div class="wrap"><div class="sec-h rv"><div class="num">08</div><h2>Homework Assignment<small>Individual work, to be submitted</small></h2></div>
+<div class="hw rv">
+<h3>Styling your academic profile page</h3>
+<p>Take your Session 01 profile page and give it a professional appearance through a single external stylesheet <code class="i">css/style.css</code>. Submit <code class="i">lastname_firstname_TP5.zip</code>.</p>
+<ul class="list">
+<li>No inline styles and no <code class="i">style</code> element: the HTML may only gain classes where strictly necessary.</li>
+<li>A <code class="i">:root</code> block defining at least six design tokens (colours, spacing, radius, font stack), all used through <code class="i">var()</code>.</li>
+<li>A global <code class="i">box-sizing: border-box</code> reset, a <code class="i">rem</code>-based type scale, and a readable line length.</li>
+<li>At least one use each of: an attribute selector, a child combinator, a sibling combinator, <code class="i">:nth-child()</code>, <code class="i">:not()</code> or <code class="i">:is()</code>, <code class="i">::before</code> or <code class="i">::after</code>, and a visible <code class="i">:focus-visible</code> style.</li>
+<li>A comment at the top of the stylesheet listing the specificity of your five most specific selectors.</li>
+</ul>
+<p><b>Assessment criteria:</b> selector quality 30% &middot; correct use of the cascade and tokens 25% &middot; box model mastery 20% &middot; visual quality and readability 15% &middot; code organisation 10%.</p>
+<span class="dead">Deadline: beginning of Session 06</span>
+</div>
+</div></section>
+<section id="refs" data-title="Further reading"><div class="wrap"><div class="sec-h rv"><div class="num">09</div><h2>References &amp; Further Reading<small>Primary specifications and reference documentation</small></h2></div><div class="card rv"><ol class="steps refs"><li>W3C. <i>Selectors Level 4</i>. <a href="https://www.w3.org/TR/selectors-4/" target="_blank" rel="noopener noreferrer">w3.org/TR/selectors-4</a></li><li>W3C. <i>CSS Cascading and Inheritance Level 5</i>. <a href="https://www.w3.org/TR/css-cascade-5/" target="_blank" rel="noopener noreferrer">w3.org/TR/css-cascade-5</a></li><li>W3C. <i>CSS Box Model Module Level 3</i>. <a href="https://www.w3.org/TR/css-box-3/" target="_blank" rel="noopener noreferrer">w3.org/TR/css-box-3</a></li><li>MDN. <i>CSS: Cascading Style Sheets</i>. <a href="https://developer.mozilla.org/en-US/docs/Web/CSS" target="_blank" rel="noopener noreferrer">developer.mozilla.org</a></li></ol></div></div></section><footer><div class="wrap">
+  <p><b>Dr. Gharbi Farouk</b> &middot; Human-Machine Interface (IHM)</p>
+  <p>Faculty of Economics, Commerce &amp; Management Sciences &middot; University of Tipaza &middot; Academic year 2026/2027</p>
+  <p style="margin-top:8px">Previous: <a href="IHM_S04_HTML_Forms_Accessibility.html">Forms &amp; Accessibility</a> &middot; Next: <a href="IHM_S06_CSS_Flexbox_Grid.html">Flexbox &amp; Grid Layout</a></p>
+</div></footer>
+
+<button class="toTop" id="toTop" aria-label="Back to top">TOP</button>
+<div class="toast" id="toast">Copied to clipboard</div>
+
+
+<script type="text/plain" id="c-first">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>First stylesheet</title>
+  <!-- In production: <link rel="stylesheet" href="css/style.css"> -->
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      color: #1e293b;
+      background: #f8fafc;
+      margin: 2rem;
+    }
+    h1 {
+      color: #4f46e5;
+      letter-spacing: -0.02em;
+    }
+    .lead {
+      font-size: 1.15rem;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <h1>Faculty of Economics</h1>
+  <p class="lead">Training the managers of the digital economy.</p>
+  <p>An ordinary paragraph inherits the body colour.</p>
+</body>
+</html>
+</script>
+<script type="text/plain" id="c-cascade">
+<style>
+  /* Specificity (0,0,1) */
+  p { color: grey; }
+
+  /* Specificity (0,1,0): beats p */
+  .note { color: #2563eb; }
+
+  /* Specificity (0,1,1): beats .note */
+  p.note { color: #16a34a; }
+
+  /* Specificity (1,0,0): beats all the above */
+  #alert { color: #dc2626; }
+
+  /* Same specificity as .note, declared later: wins over .note */
+  .note { font-weight: bold; }
+
+  /* Inheritance: the span inherits the colour of its parent */
+  .box { color: #9333ea; border: 2px solid #9333ea; padding: 8px; }
+</style>
+
+<p>Grey paragraph</p>
+<p class="note">Green and bold: p.note (0,1,1) wins</p>
+<p class="note" id="alert">Red: the ID (1,0,0) wins</p>
+<div class="box">Purple box with an <span>inherited purple span</span>,
+  but the border is not inherited by the span.</div>
+</script>
+<script type="text/plain" id="c-vars">
+<style>
+  :root {
+    --brand: hsl(243 75% 59%);
+    --brand-soft: hsl(243 75% 59% / 12%);
+    --text: #0f172a;
+    --radius: 14px;
+    --space: 1rem;
+  }
+  body { font-family: system-ui, sans-serif; color: var(--text); }
+  .card {
+    max-width: 38ch;
+    padding: calc(var(--space) * 1.5);
+    border-radius: var(--radius);
+    background: var(--brand-soft);
+    border: 1px solid var(--brand);
+  }
+  .card h3 { margin-top: 0; color: var(--brand); font-size: 1.4rem; }
+  /* Overriding a token locally */
+  .card.danger { --brand: hsl(0 72% 51%); --brand-soft: hsl(0 72% 51% / 10%); }
+</style>
+
+<div class="card"><h3>Premium plan</h3><p>Uses the brand tokens.</p></div>
+<br>
+<div class="card danger"><h3>Overdue invoice</h3><p>Same rule, tokens redefined locally.</p></div>
+</script>
+<script type="text/plain" id="c-box">
+<style>
+  .box {
+    width: 260px;
+    padding: 20px;
+    border: 6px solid #6366f1;
+    margin: 12px 0;
+    background: #e0e7ff;
+    font-family: system-ui, sans-serif;
+  }
+  .content-box { box-sizing: content-box; }  /* rendered: 312px */
+  .border-box  { box-sizing: border-box; }   /* rendered: 260px */
+  .ruler { width: 260px; height: 6px; background: #f43f5e; }
+</style>
+
+<div class="ruler"></div>
+<div class="box content-box">content-box: 260 + 40 + 12 = 312px</div>
+<div class="box border-box">border-box: exactly 260px</div>
+</script>
+<script type="text/plain" id="sol1">
+<style>
+  :root {
+    --primary: #4f46e5;
+    --text: #1e293b;
+    --bg: #f8fafc;
+    --space: 1rem;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, "Segoe UI", sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+  }
+  header, main, footer { max-width: 70ch; margin-inline: auto; padding: var(--space); }
+  nav a { margin-right: var(--space); }
+  a { color: var(--primary); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; }
+  article {
+    padding: calc(var(--space) * 1.5);
+    margin-block: var(--space);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+  }
+</style>
+<header><h1>Faculty News</h1>
+  <nav><a href="#">Home</a><a href="#">Events</a><a href="#">Contact</a></nav></header>
+<main>
+  <article><h2>New Business Computing lab</h2><p>A new lab with 40 workstations opens this semester.</p></article>
+  <article><h2>Entrepreneurship week</h2><p>Start-up founders meet students from 10 to 14 November.</p></article>
+</main>
+<footer><p>University of Tipaza</p></footer>
+</script>
+<script type="text/plain" id="e2">
+<main>
+  <h1>Catalogue</h1>
+  <p>Our selection of the week.</p>
+  <section class="grid">
+    <article class="product"><h2>Laptop</h2><span class="price">95 000 DZD</span></article>
+    <article class="product"><h2>Printer</h2><span class="badge">-20%</span><span class="price">24 000 DZD</span></article>
+  </section>
+  <a href="catalogue.pdf">Download the catalogue</a>
+  <a href="https://supplier.dz">Our supplier</a>
+  <table><tbody><tr><td>A</td></tr><tr><td>B</td></tr><tr><td>C</td></tr></tbody></table>
+  <form><input required type="email" name="email"></form>
+</main>
+</script>
+<script type="text/plain" id="e3">
+<style>
+  .box { color: red; }
+  h2 { color: blue; }
+  .box h2 { color: green; }
+  #promo h2 { color: orange; }
+  .box .title { color: purple; }
+  a { color: grey; }
+  .box a { color: #14b8a6; }
+  .box a { color: #0d9488; }
+</style>
+<div class="box" id="promo">
+  <h2 class="title">Which colour am I?</h2>
+  <a href="#">And which colour am I?</a>
+</div>
+</script>
+<script type="text/plain" id="sol4">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  .card {
+    width: 300px;
+    padding: 20px;
+    border: 2px solid #6366f1;
+    border-radius: 12px;
+    font-family: system-ui, sans-serif;
+  }
+  .card.a { margin-bottom: 24px; }
+  .card.b { margin-top: 16px; }  /* collapses: gap = 24px */
+  .ruler { width: 300px; height: 4px; background: #f43f5e; }
+</style>
+<div class="ruler"></div>
+<div class="card a">Card A: exactly 300px wide</div>
+<div class="card b">Card B: 24px below card A</div>
+</script>
+
+<script>
+(function(){
+  'use strict';
+  var KW='const|let|var|function|return|if|else|for|while|do|of|in|new|class|extends|this|true|false|null|undefined|typeof|instanceof|switch|case|break|continue|default|async|await|try|catch|finally|throw|import|export|from|static|get|set';
+  function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function tokJS(code,T){
+    var re=new RegExp("(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)|('(?:\\\\.|[^'\\\\\\n])*'|\"(?:\\\\.|[^\"\\\\\\n])*\"|`(?:\\\\.|[^`\\\\])*`)|(\\b\\d+(?:\\.\\d+)?\\b)|\\b("+KW+")\\b|([A-Za-z_$][\\w$]*)(?=\\s*\\()","g");
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'num':m[4]?'kw':'fn',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokCSS(code,T){
+    var re=/(\/\*[\s\S]*?\*\/)|("[^"\n]*"|'[^'\n]*')|(--[\w-]+|[a-z-]+)(?=\s*:[^;{}]*[;}])|(@[\w-]+)|(#[0-9a-fA-F]{3,8}\b|-?\b\d*\.?\d+(?:px|rem|em|%|vh|vw|vmin|vmax|ms|s|deg|fr|ch)?\b)|([^{};\/@]+?)(?=\s*\{)/g;
+    var m,last=0;
+    while((m=re.exec(code))){
+      if(m[0]===''){re.lastIndex++;continue;}
+      if(m.index>last)T.push(['',code.slice(last,m.index)]);
+      T.push([m[1]?'com':m[2]?'str':m[3]?'prop':m[4]?'at':m[5]?'num':'sel',m[0]]);last=re.lastIndex;
+    }
+    if(last<code.length)T.push(['',code.slice(last)]);
+  }
+  function tokTag(t,T){
+    var m=t.match(/^<(\/?)([!\w-]+)([\s\S]*?)(\/?>)$/);
+    if(!m){T.push(['',t]);return;}
+    T.push(['pun','<'+m[1]]);T.push(['tag',m[2]]);
+    var re=/([\w:@.-]+)(\s*=\s*)?("[^"]*"|'[^']*'|[^\s"'>]+)?|(\s+)|([\s\S])/g,a;
+    while((a=re.exec(m[3]))){
+      if(a[1]){T.push(['att',a[1]]);if(a[2])T.push(['pun',a[2]]);if(a[3])T.push(['str',a[3]]);}
+      else T.push(['',a[0]]);
+    }
+    T.push(['pun',m[4]]);
+  }
+  var CO='<'+'!'+'--',CC='--'+'>';
+  function tokHTML(code,T){
+    var i=0,j;
+    while(i<code.length){
+      if(code.startsWith(CO,i)){
+        j=code.indexOf(CC,i);j=j<0?code.length:j+3;T.push(['com',code.slice(i,j)]);i=j;
+      }else if(code[i]==='<'&&/[\/!a-zA-Z]/.test(code[i+1]||'')){
+        j=code.indexOf('>',i);j=j<0?code.length:j+1;
+        var tg=code.slice(i,j);tokTag(tg,T);i=j;
+        var om=tg.match(/^<(style|script)\b/i);
+        if(om&&!/type\s*=\s*["']text\/plain/i.test(tg)){
+          var close='</'+om[1].toLowerCase(),k=code.toLowerCase().indexOf(close,i);if(k<0)k=code.length;
+          var inner=code.slice(i,k);
+          if(om[1].toLowerCase()==='style')tokCSS(inner,T);else tokJS(inner,T);
+          i=k;
+        }
+      }else{
+        j=code.indexOf('<',i+1);if(j<0)j=code.length;
+        code.slice(i,j).split(/(&[a-zA-Z#0-9]+;)/).forEach(function(p,x){if(p)T.push([x%2?'ent':'',p]);});
+        i=j;
+      }
+    }
+  }
+  function tokens(code,lang){var T=[];(lang==='css'?tokCSS:lang==='js'?tokJS:tokHTML)(code,T);return T;}
+  function render(T,plain){
+    var lines=[[]];
+    T.forEach(function(t){
+      t[1].split('\n').forEach(function(p,i){
+        if(i>0)lines.push([]);
+        if(p)lines[lines.length-1].push(t[0]?'<span class="t-'+t[0]+'">'+esc(p)+'</span>':esc(p));
+      });
+    });
+    if(plain)return lines.map(function(l){return l.join('');}).join('\n');
+    return lines.map(function(l,n){return '<span class="ln" data-n="'+(n+1)+'">'+(l.join('')||' ')+'</span>';}).join('');
+  }
+  window.IHM={hl:function(c,l){return render(tokens(c,l));},hlPlain:function(c,l){return render(tokens(c,l),true);},esc:esc};
+
+  var SC='<'+'script>',SE='<'+'/script>';
+  var CONSOLE='<style>#__c{font:12.5px/1.6 Consolas,monospace;background:#0b1020;color:#c9d1f5;padding:10px 14px;margin-top:16px;border-radius:10px;white-space:pre-wrap}#__c div{border-bottom:1px solid #1e2748;padding:3px 0}#__c .e{color:#f87171}#__c .w{color:#fbbf24}#__c b{color:#22d3ee}</style>'+SC+
+  '(function(){var q=[],box=null;function f(x){if(typeof x==="string")return x;try{return JSON.stringify(x)}catch(e){return String(x)}}'+
+  'function add(c,a){if(!box){q.push([c,a]);return}var d=document.createElement("div");d.className=c;d.textContent="> "+[].map.call(a,f).join(" ");box.appendChild(d)}'+
+  'var L=console.log;console.log=function(){add("",arguments);L.apply(console,arguments)};console.info=console.log;console.table=console.log;'+
+  'console.warn=function(){add("w",arguments)};console.error=function(){add("e",arguments)};'+
+  'window.addEventListener("error",function(e){add("e",["Uncaught "+e.message])});'+
+  'document.addEventListener("DOMContentLoaded",function(){box=document.createElement("div");box.id="__c";box.innerHTML="<b>Console</b>";document.body.appendChild(box);q.forEach(function(x){add(x[0],x[1])});q=[]})})()'+SE;
+  function wrapDoc(src,lang,cons){
+    var base='<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;padding:16px;line-height:1.6;color:#1e293b}</style>';
+    var doc;
+    if(lang==='css')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'<style>'+src+'</style></head><body></body></html>';
+    else if(lang==='js')doc='<!DOCTYPE html><html><head><meta charset="UTF-8">'+base+'</head><body>'+SC+src+SE+'</body></html>';
+    else if(/<html/i.test(src))doc=src;
+    else doc='<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'+base+'</head><body>'+src+'</body></html>';
+    if(cons){doc=/<head[^>]*>/i.test(doc)?doc.replace(/<head([^>]*)>/i,'<head$1>'+CONSOLE):CONSOLE+doc;}
+    return doc;
+  }
+
+  document.querySelectorAll('.code[data-src]').forEach(function(box){
+    var el=document.getElementById(box.dataset.src);
+    if(!el){box.textContent='Missing source: '+box.dataset.src;return;}
+    var orig=el.textContent.replace(/<\\\/script>/g,SE).replace(/^\n+|\s+$/g,''),src=orig;
+    var lang=box.dataset.lang||'html',run=box.hasAttribute('data-run'),cons=box.hasAttribute('data-console');
+    box.innerHTML='<div class="code-h"><span class="lbl">'+(box.dataset.label||lang)+'</span><div class="acts">'+
+      (run?'<button data-act="run">Run</button><button data-act="edit">Edit live</button>':'')+'<button data-act="copy">Copy</button></div></div><pre>'+IHM.hl(src,lang)+'</pre>'+
+      (run?'<div class="preview"><iframe title="Live preview" loading="lazy"></iframe></div>':'');
+    var pre=box.querySelector('pre');
+    box.querySelector('[data-act="copy"]').onclick=function(){
+      var done=function(){toast('Copied to clipboard');};
+      if(navigator.clipboard)navigator.clipboard.writeText(src).then(done,fallback);else fallback();
+      function fallback(){var ta=document.createElement('textarea');ta.value=src;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}ta.remove();done();}
+    };
+    if(!run)return;
+    var pv=box.querySelector('.preview'),fr=pv.querySelector('iframe'),bRun=box.querySelector('[data-act="run"]'),bEd=box.querySelector('[data-act="edit"]'),ta=null,tm;
+    function show(){fr.srcdoc=wrapDoc(src,lang,cons);}
+    bRun.onclick=function(){
+      var open=pv.classList.toggle('open');
+      if(open)show();
+      bRun.textContent=open?'Hide':'Run';bRun.classList.toggle('on',open);refreshSol(box);
+    };
+    bEd.onclick=function(){
+      if(!ta){
+        ta=document.createElement('textarea');ta.value=src;ta.spellcheck=false;
+        ta.style.height=Math.max(260,pre.offsetHeight)+'px';
+        pre.replaceWith(ta);bEd.textContent='Reset';bEd.classList.add('on');
+        if(!pv.classList.contains('open')){pv.classList.add('open');bRun.textContent='Hide';bRun.classList.add('on');}
+        show();
+        ta.addEventListener('input',function(){src=ta.value;clearTimeout(tm);tm=setTimeout(show,350);});
+        ta.addEventListener('keydown',function(e){if(e.key==='Tab'){e.preventDefault();var s=ta.selectionStart;ta.setRangeText('  ',s,ta.selectionEnd,'end');src=ta.value;}});
+        ta.focus();
+      }else{
+        src=orig;pre.innerHTML=IHM.hl(src,lang);ta.replaceWith(pre);ta=null;bEd.textContent='Edit live';bEd.classList.remove('on');show();
+      }
+      refreshSol(box);
+    };
+  });
+  function toast(t){var e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(function(){e.classList.remove('show');},1600);}
+  window.IHM.toast=toast;
+  function refreshSol(el){var s=el.closest('.sol');if(s&&s.classList.contains('on'))setTimeout(function(){s.style.maxHeight=s.scrollHeight+600+'px';},40);}
+  window.IHM.refreshSol=refreshSol;
+  document.querySelectorAll('[data-sol]').forEach(function(btn){
+    var sol=btn.nextElementSibling;
+    btn.onclick=function(){
+      var on=sol.classList.toggle('on');
+      sol.style.maxHeight=on?sol.scrollHeight+600+'px':'0';
+      btn.textContent=on?'Hide solution':'Show solution';
+    };
+  });
+
+  var TL=[":root {", "  --brand: #6366f1;", "}", ".card:hover > h2 {", "  color: var(--brand);", "}", "*, *::before, *::after {", "  box-sizing: border-box;", "}", ".card {", "  padding: 24px;", "  border: 1px solid #e2e8f0;", "}"],TLANG='css',full=TL.join('\n'),k=0,tp=document.getElementById('typed');
+  (function type(){
+    if(!tp)return;
+    if(k<=full.length){tp.innerHTML=IHM.hlPlain(full.slice(0,k),TLANG)+'<span class="caret"></span>';k++;setTimeout(type,full[k-1]==='\n'?170:26);}
+    else setTimeout(function(){k=0;type();},4200);
+  })();
+  var term=document.getElementById('term');
+  if(term){
+    term.addEventListener('mousemove',function(e){var r=term.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;term.style.transform='perspective(900px) rotateY('+(x*14)+'deg) rotateX('+(-y*14)+'deg)';});
+    term.addEventListener('mouseleave',function(){term.style.transform='';});
+  }
+  var glow=document.getElementById('glow');
+  window.addEventListener('mousemove',function(e){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px';});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.1});
+  document.querySelectorAll('.rv,[data-io]').forEach(function(el){io.observe(el);});
+
+  var secs=[].slice.call(document.querySelectorAll('section[id]')),nav=document.getElementById('sidenav');
+  secs.forEach(function(s){var a=document.createElement('a');a.href='#'+s.id;a.innerHTML='<span>'+(s.dataset.title||s.id)+'</span>';nav.appendChild(a);});
+  var links=nav.querySelectorAll('a'),last=0,bar=document.getElementById('topbar'),top=document.getElementById('toTop');
+  window.addEventListener('scroll',function(){
+    var h=document.documentElement,y=h.scrollTop;
+    document.getElementById('progress').style.width=(y/Math.max(1,h.scrollHeight-h.clientHeight)*100)+'%';
+    bar.classList.toggle('hide',y>last&&y>200);last=y;top.classList.toggle('show',y>600);
+    var cur=0;secs.forEach(function(s,i){if(s.offsetTop-window.innerHeight/2<=y)cur=i;});
+    links.forEach(function(a,i){a.classList.toggle('active',i===cur);});
+  },{passive:true});
+  top.onclick=function(){window.scrollTo({top:0,behavior:'smooth'});};
+  var tb=document.getElementById('themeBtn');
+  tb.onclick=function(){var r=document.documentElement,l=r.getAttribute('data-theme')==='light';r.setAttribute('data-theme',l?'dark':'light');tb.textContent=l?'Light mode':'Dark mode';};
+
+  var Q=[{"q": "What is the specificity of <code>#nav .item a<\/code>?", "o": ["(0,1,2)", "(1,1,1)", "(1,2,1)", "(0,2,1)"], "a": 1}, {"q": "Which selector targets only direct <code>li<\/code> children of <code>ul.menu<\/code>?", "o": ["ul.menu li", "ul.menu > li", "ul.menu + li", "ul.menu ~ li"], "a": 1}, {"q": "With <code>box-sizing: content-box<\/code>, width 200px, padding 20px and border 5px, the rendered width is:", "o": ["200px", "225px", "250px", "240px"], "a": 2}, {"q": "Which property is inherited by default?", "o": ["border", "margin", "color", "padding"], "a": 2}, {"q": "Two declarations of equal specificity and origin conflict. Which wins?", "o": ["The first one declared", "The last one declared", "The shorter one", "Neither; the property is ignored"], "a": 1}],qb=document.getElementById('quizBox');
+  if(qb){
+    var score=0,done=0,res=document.createElement('div');res.className='score gtxt';
+    Q.forEach(function(it,qi){
+      var d=document.createElement('div');d.className='q';
+      d.innerHTML='<p>'+(qi+1)+'. '+it.q+'</p><div class="opts"></div>';
+      var o=d.querySelector('.opts');
+      it.o.forEach(function(t,oi){
+        var b=document.createElement('button');b.className='opt';b.innerHTML=t;
+        b.onclick=function(){
+          if(d.dataset.done)return;d.dataset.done=1;done++;
+          if(oi===it.a){b.classList.add('right');score++;}else{b.classList.add('wrong');o.children[it.a].classList.add('right');}
+          if(done===Q.length)res.textContent='Your score: '+score+' / '+Q.length+(score===Q.length?' - Excellent.':score>=3?' - Good; review the items you missed.':' - Please revisit the lesson before the next session.');
+        };
+        o.appendChild(b);
+      });
+      qb.appendChild(d);
+    });
+    qb.appendChild(res);
+  }
+})();
+</script>
+<script>
+(function(){
+'use strict';
+/* ---------- selector playground + specificity ---------- */
+function spec(sel){
+  var a=0,b=0,c=0,s=sel;
+  var re=/:(is|not|has|where)\(/i,m;
+  while((m=re.exec(s))){
+    var start=m.index,i=start+m[0].length,d=1;
+    while(i<s.length&&d){if(s[i]==='(')d++;else if(s[i]===')')d--;i++;}
+    var inner=s.slice(start+m[0].length,i-1);
+    if(m[1].toLowerCase()!=='where'){
+      var best=[0,0,0];
+      inner.split(',').forEach(function(p){var r=spec(p.trim());if(r[0]>best[0]||(r[0]===best[0]&&(r[1]>best[1]||(r[1]===best[1]&&r[2]>best[2]))))best=r;});
+      a+=best[0];b+=best[1];c+=best[2];
+    }
+    s=s.slice(0,start)+' '+s.slice(i);
+  }
+  s=s.replace(/::[\w-]+(\([^)]*\))?/g,function(){c++;return ' ';});
+  s=s.replace(/:(before|after|first-line|first-letter)\b/g,function(){c++;return ' ';});
+  s=s.replace(/#[\w-]+/g,function(){a++;return ' ';});
+  s=s.replace(/\[[^\]]*\]/g,function(){b++;return ' ';});
+  s=s.replace(/\.[\w-]+/g,function(){b++;return ' ';});
+  s=s.replace(/:[\w-]+(\([^)]*\))?/g,function(){b++;return ' ';});
+  s.replace(/(^|[\s>+~])([a-zA-Z][\w-]*)/g,function(){c++;});
+  return [a,b,c];
+}
+window.IHM.spec=spec;
+var inp=document.getElementById('selIn'),stage=document.getElementById('domStage');
+function runSel(){
+  var v=inp.value.trim(),msg=document.getElementById('selMsg');
+  stage.querySelectorAll('.hit').forEach(function(e){e.classList.remove('hit');});
+  if(!v){msg.textContent='';return;}
+  var n=0;
+  try{stage.querySelectorAll(':scope '+v.split(',').join(', :scope ')).forEach(function(e){e.classList.add('hit');n++;});msg.innerHTML='<b>'+n+'</b> element'+(n===1?'':'s')+' matched.';}
+  catch(e){msg.textContent='Invalid selector: '+e.message.split(':').pop();}
+  var r=spec(v.split(',')[0]);
+  ['sa','sb','sc'].forEach(function(id,i){document.getElementById(id).textContent=r[i];});
+}
+inp.addEventListener('input',runSel);
+document.querySelectorAll('.presets button').forEach(function(b){b.onclick=function(){inp.value=b.textContent;runSel();};});
+runSel();
+/* ---------- box model ---------- */
+var bm={w:180,p:20,b:6,m:16,bs:'content-box'};
+function drawBM(){
+  ['w','p','b','m'].forEach(function(k){document.getElementById('bv_'+k).textContent=bm[k]+'px';});
+  var cw=bm.bs==='border-box'?Math.max(0,bm.w-2*bm.p-2*bm.b):bm.w;
+  document.querySelector('.bm-m').style.padding=bm.m/2+'px';
+  document.querySelector('.bm-b').style.padding=bm.b+'px';
+  document.querySelector('.bm-p').style.padding=bm.p/1.5+'px';
+  var c=document.querySelector('.bm-c');c.style.width=cw+'px';c.textContent=cw+' x 70';
+  var rendered=cw+2*bm.p+2*bm.b,occupied=rendered+2*bm.m;
+  document.getElementById('calc').innerHTML=
+    'box-sizing: <b>'+bm.bs+'</b>; width: '+bm.w+'px<br>'+
+    'content width = '+(bm.bs==='border-box'?bm.w+' - 2&times;'+bm.p+' - 2&times;'+bm.b+' = ':'')+'<b>'+cw+'px</b><br>'+
+    'rendered (border-box) width = '+cw+' + 2&times;'+bm.p+' + 2&times;'+bm.b+' = <b>'+rendered+'px</b><br>'+
+    'horizontal space occupied = '+rendered+' + 2&times;'+bm.m+' = <b>'+occupied+'px</b>';
+}
+['w','p','b','m'].forEach(function(k){document.getElementById('bm_'+k).addEventListener('input',function(e){bm[k]=+e.target.value;drawBM();});});
+document.getElementById('bm_bs').addEventListener('change',function(e){bm.bs=e.target.value;drawBM();});
+drawBM();
+})();
+</script>
+</body>
+</html>
